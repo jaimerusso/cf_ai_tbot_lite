@@ -2,9 +2,14 @@
 
 /* O teu estilo de scrollbar pode ficar abaixo */
 ::-webkit-scrollbar {
-  width: 6px;
+    width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #e5e7eb;
-  border-radius: 10px;
+    background-color: #e5e7eb;
+    border-radius: 10px;
+}
+
+@theme {
+    --color-cf: #f48120;
+    --color-tbot: #f00094;
 }

@@ -37,4 +37,4 @@ In this project, AI was used as a development "co-pilot" specifically for:
 - **Styling:** Tailwind CSS v4
 - **Infrastructure:** Cloudflare Pages
 - **Backend:** Cloudflare Workers
-- **LLM:** **TD**
+- **LLM:** **TBD**

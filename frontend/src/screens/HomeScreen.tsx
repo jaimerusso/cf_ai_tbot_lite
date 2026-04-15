@@ -1,6 +1,5 @@
 // import Navbar from "../components/Navbar";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import logo from "../assets/CFxtbot.png";
 
 import Button from "../components/Button";

@@ -58,7 +58,7 @@ export default {
 			try {
 				const body = (await request.json()) as { prompt: string };
 				const response = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-					prompt: 'Say hello in a different way!',
+					prompt: body.prompt,
 				});
 				return new Response(JSON.stringify(response));
 			} catch (error) {

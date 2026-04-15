@@ -1,4 +1,4 @@
-import { DurableObject } from "cloudflare:workers";
+import { DurableObject } from 'cloudflare:workers';
 
 /**
  * Welcome to Cloudflare Workers! This is your first Durable Objects application.
@@ -50,26 +50,27 @@ export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
 
-		if (url.pathname === "/dialogue" && request.method === "POST") {
+		if (url.pathname === '/dialogue' && request.method === 'POST') {
 			//Logic to build an answer and return to the client
 
-			try {
-				const body = await request.json() as { prompt: string };
-				return new Response(body.prompt);
-			} catch (error) {
-				return new Response("Invalid JSON body", { status: 400 });
-			}
+			//TODO Verificar como funciona a integração com o durable object em cima para manter as boas práticas de programação
 
-			
-			const stub = env.MY_DURABLE_OBJECT.getByName("foo");
-			const greeting = await stub.sayHello("world");
-			//return new Response(greeting);
+			try {
+				const body = (await request.json()) as { prompt: string };
+				const response = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+					prompt: 'Say hello in a different way!',
+				});
+				return new Response(JSON.stringify(response));
+			} catch (error) {
+				return new Response('Invalid JSON body', { status: 400 });
+			}
 		}
-		if (url.pathname === "/test") {
-			const stub = env.MY_DURABLE_OBJECT.getByName("foo");
-			const greeting = await stub.sayHello("world");
+		if (url.pathname === '/test') {
+			const stub = env.MY_DURABLE_OBJECT.getByName('foo');
+			const greeting = await stub.sayHello('world');
 			return new Response(greeting);
 		}
-		return new Response("Not found", { status: 404 });
+
+		return new Response('Not found', { status: 404 });
 	},
 } satisfies ExportedHandler<Env>;

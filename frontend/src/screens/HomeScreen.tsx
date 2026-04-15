@@ -11,7 +11,6 @@ export default function HomeScreen() {
 
 	return (
 		<div className="flex flex-col items-center mt-7 px-30 gap-10">
-			{/* <Navbar page={"Início"} /> */}
 			<div className="flex flex-col items-center gap-10 w-200 | bg-white mb-10 p-10 rounded-lg drop-shadow-xl drop-shadow-cf">
 				<div className="flex flex-col gap-2 items-center">
 					<img src={logo} className="w-xl" />
@@ -68,13 +67,6 @@ export default function HomeScreen() {
 						text="Dialogue chat"
 						color="tbot"
 					/>
-					{/* <Link to="/knowledge" className="inline-block">
-                    <div className="p-5 border-4 rounded-[20px] text-tinsight border border-tinsight bg-white w-max hover:bg-tinsight hover:text-white transition">
-                        <p className="color-tinsight font-bold text-xl">
-                            Documentos do assistente
-                        </p>
-                    </div>
-                </Link> */}
 				</div>
 			</div>
 		</div>

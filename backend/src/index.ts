@@ -1,4 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
+import { runWithTools } from '@cloudflare/ai-utils';
+import { getAnswer } from './services/conversational/conversational';
 
 /**
  * Welcome to Cloudflare Workers! This is your first Durable Objects application.
@@ -52,23 +54,23 @@ export default {
 
 		if (url.pathname === '/dialogue' && request.method === 'POST') {
 			//Logic to build an answer and return to the client
-
-			//TODO Verificar como funciona a integração com o durable object em cima para manter as boas práticas de programação
-
 			try {
 				const body = (await request.json()) as { prompt: string };
-				const response = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-					prompt: body.prompt,
-				});
+				let [messages, response] = await getAnswer(env, body.prompt);
+
+				//Save messages in the Durable Object (for the future context of the conversation)
+				//...
+
 				return new Response(JSON.stringify(response));
 			} catch (error) {
 				return new Response('Invalid JSON body', { status: 400 });
 			}
 		}
 		if (url.pathname === '/test') {
-			const stub = env.MY_DURABLE_OBJECT.getByName('foo');
-			const greeting = await stub.sayHello('world');
-			return new Response(greeting);
+			return new Response('Test endpoint is working!');
+			//const stub = env.MY_DURABLE_OBJECT.getByName('foo');
+			//const greeting = await stub.sayHello('world');
+			//return new Response(greeting);
 		}
 
 		return new Response('Not found', { status: 404 });

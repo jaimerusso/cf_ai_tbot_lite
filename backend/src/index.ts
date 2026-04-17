@@ -87,17 +87,16 @@ export class ChatRoom extends DurableObject {
 
 	// Called when a message arrives — the object wakes from hibernation if needed
 	async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
-		for (const conn of this.ctx.getWebSockets()) {
-			if (typeof message === 'string') {
-				let [messages, response] = await getAnswer(this.env, message);
-				conn.send(response);
-			} else {
-				conn.send('Invalid message type. Message must be a string!');
-			}
-
-			//Save messages in the Durable Object (for the future context of the conversation)
-			//...
+		if (typeof message === 'string') {
+			console.log(message);
+			let [messages, response] = await getAnswer(this.env, message);
+			ws.send(response);
+		} else {
+			ws.send('Invalid message type. Message must be a string!');
 		}
+
+		//Save messages in the Durable Object (for the future context of the conversation)
+		//...
 	}
 
 	async webSocketClose(ws: WebSocket, code: number, reason: string, wasClean: boolean) {

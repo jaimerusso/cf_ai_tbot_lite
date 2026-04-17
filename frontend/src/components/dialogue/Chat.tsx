@@ -1,18 +1,93 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Input from "./Input";
 import logo from "../../assets/CFxtbot.png";
+import axios from "axios";
+import Messages from "./Messages";
+import Header from "./Header";
 
-export default function Chat() {
-	const [messages, setMessages] = useState([]);
+export interface Message {
+	role: string;
+	content: string;
+}
+
+export default function Chat({ IP }: { IP: string }) {
+	const [prompt, setPrompt] = useState("");
+	const [messages, setMessages] = useState<Message[]>([]);
+	const ws = useRef<WebSocket | null>(null);
+
+	const sendMessage = (prompt: string) => {
+		const socket = ws.current;
+
+		//Send message if socket is open
+		if (socket && socket.readyState === WebSocket.OPEN) {
+			//Update messages with user prompt
+			setMessages((prev) => [
+				...prev,
+				{
+					role: "user",
+					content: prompt,
+				},
+			]);
+
+			console.log("Sending message:", prompt);
+			socket.send(prompt);
+		} else {
+			console.log("WebSocket is not open");
+			// ws.current = new WebSocket(`ws://${IP}`);
+			// ws.current.send(prompt);
+		}
+	};
+
+	useEffect(() => {
+		// if (!IP || dialogueID === -1) return;
+		if (!IP) return;
+
+		const socket = new WebSocket(`ws://${IP}`);
+		ws.current = socket;
+
+		socket.onopen = () => {
+			console.log("WebSocket opened");
+		};
+
+		socket.onmessage = (event) => {
+			const response = event.data;
+			console.log("Received message:", response);
+			//Update messages with assistant response
+			setMessages((prev) => [
+				...prev,
+				{
+					role: "assistant",
+					content: response,
+				},
+			]);
+		};
+
+		socket.onerror = (error) => {
+			console.error("WebSocket error:", error);
+		};
+
+		socket.onclose = () => {
+			console.log("WebSocket closed");
+		};
+
+		return () => {
+			if (socket.readyState === WebSocket.OPEN) {
+				socket.close();
+			}
+			ws.current = null;
+		};
+	}, [IP]);
 
 	return (
 		<div className="flex flex-col w-5/6 h-full bg-black relative">
-			<div className="flex-1">
+			<div className="flex-1 absolute top-0 left-0 right-0 bottom-0">
 				<div className="flex flex-1 flex-row pointer-events-none items-center bg-gradient-to-r from-cf to-tbot justify-center w-full h-full">
 					<img src={logo} className="w-xl opacity-50"></img>
 				</div>
 			</div>
-			<Input />
+			<Header />
+			<Messages messages={messages} />
+			<Input sendMessage={sendMessage} />
 		</div>
 	);
 }

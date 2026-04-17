@@ -11,8 +11,8 @@ export interface Message {
 }
 
 export default function Chat({ IP }: { IP: string }) {
-	const [prompt, setPrompt] = useState("");
-	const [messages, setMessages] = useState<Message[]>([]);
+	const [waitingResponse, setWaitingResponse] = useState(false); //State to track if waiting for response from server (loading state)
+	const [messages, setMessages] = useState<Message[]>([]); //Dialogue messages
 	const ws = useRef<WebSocket | null>(null);
 
 	const sendMessage = (prompt: string) => {
@@ -28,6 +28,8 @@ export default function Chat({ IP }: { IP: string }) {
 					content: prompt,
 				},
 			]);
+
+			setWaitingResponse(true);
 
 			console.log("Sending message:", prompt);
 			socket.send(prompt);
@@ -52,6 +54,9 @@ export default function Chat({ IP }: { IP: string }) {
 		socket.onmessage = (event) => {
 			const response = event.data;
 			console.log("Received message:", response);
+
+			//Update waiting response state
+			setWaitingResponse(false);
 			//Update messages with assistant response
 			setMessages((prev) => [
 				...prev,
@@ -86,7 +91,7 @@ export default function Chat({ IP }: { IP: string }) {
 				</div>
 			</div>
 			<Header />
-			<Messages messages={messages} />
+			<Messages messages={messages} waitingResponse={waitingResponse} />
 			<Input sendMessage={sendMessage} />
 		</div>
 	);

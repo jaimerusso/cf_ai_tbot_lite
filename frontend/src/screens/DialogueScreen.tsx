@@ -1,5 +1,5 @@
-import Sidebar from "../components/dialogue/Sidebar";
-import Chat from "../components/dialogue/Chat";
+import Sidebar from "../components/sidebar/Sidebar";
+import Chat from "../components/chat/Chat";
 import { useEffect, useState } from "react";
 
 export default function DialogueScreen({ IP }: { IP: string }) {

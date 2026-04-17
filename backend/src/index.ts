@@ -88,7 +88,6 @@ export class ChatRoom extends DurableObject {
 	// Called when a message arrives — the object wakes from hibernation if needed
 	async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
 		if (typeof message === 'string') {
-			console.log(message);
 			let [messages, response] = await getAnswer(this.env, message);
 			ws.send(response);
 		} else {

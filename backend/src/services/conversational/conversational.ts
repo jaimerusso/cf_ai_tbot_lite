@@ -8,7 +8,6 @@ const start_message: RoleScopedChatInput[] = [
 
 		PERSONALITY:
 		- Keep a casual and informal tone.
-		- If the user writes in Portuguese, always respond in European Portuguese (pt-PT).
 
 		TOOLS:
 		- You have access to two functions: searchDocuments and genericRes.
@@ -41,8 +40,16 @@ function appendMessage(messages: RoleScopedChatInput[], role: string, content: s
 //Get the intent of the user and return the tool to call (or fallback - generic) and the arguments to call it (or the original prompt)
 async function getIntent(env: Env, prompt: string, messages: RoleScopedChatInput[]): Promise<[string, string]> {
 	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages, tools })) as any;
+	console.log('response: ', response);
 
-	const tool = response.tool_calls[0];
+	const toolCalls = response.tool_calls;
+
+	//Check if tool_calls is empty and return default response if it is
+	if (!toolCalls || toolCalls.length === 0) {
+		return ['genericRes', prompt];
+	}
+
+	const tool = toolCalls[0];
 
 	switch (tool.name) {
 		case 'searchDocuments':
@@ -53,6 +60,7 @@ async function getIntent(env: Env, prompt: string, messages: RoleScopedChatInput
 }
 
 export async function getAnswer(env: Env, prompt: string, messages = start_message): Promise<[RoleScopedChatInput[], string]> {
+	console.log('Prompt received: ', prompt);
 	//Append prompt to messages
 	messages = appendMessage(messages, 'user', prompt);
 
@@ -76,6 +84,8 @@ export async function getAnswer(env: Env, prompt: string, messages = start_messa
 	}
 
 	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
+
+	console.log('Final response: ', response);
 
 	let finalRes = response.response;
 	//Append response to messages and return both

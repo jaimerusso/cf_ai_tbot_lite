@@ -4,16 +4,12 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "backend",
+	"name": "cf-ai-tbot-lite-backend",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-04-14",
 	"migrations": [
 		{
-			"new_sqlite_classes": ["MyDurableObject"],
-			"tag": "v1",
-		},
-		{
-			"new_classes": ["ChatRoom"],
+			"new_sqlite_classes": ["ChatRoom", "MyDurableObject"],
 			"tag": "v1",
 		},
 	],
@@ -24,8 +20,8 @@
 				"name": "MY_DURABLE_OBJECT",
 			},
 			{
-				"name": "CHAT_ROOM",
 				"class_name": "ChatRoom",
+				"name": "CHAT_ROOM",
 			},
 		],
 	},

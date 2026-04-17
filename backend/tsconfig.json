@@ -13,6 +13,7 @@
 		"module": "es2022",
 		/* Specify how TypeScript looks up a file from a given module specifier. */
 		"moduleResolution": "node",
+		"ignoreDeprecations": "6.0",
 		/* Enable importing .json files */
 		"resolveJsonModule": true,
 
@@ -36,9 +37,6 @@
 
 		/* Skip type checking all .d.ts files. */
 		"skipLibCheck": true,
-		"types": [
-			"./worker-configuration.d.ts",
-			"node"
-		]
+		"types": ["./worker-configuration.d.ts", "node"]
 	}
 }

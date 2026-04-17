@@ -8,6 +8,10 @@ import {
 import HomeScreen from "./screens/HomeScreen";
 import DialogueScreen from "./screens/DialogueScreen";
 
+const initialParams = {
+	IP: "https://cf-ai-tbot-lite-backend.itsjaimerusso.workers.dev/",
+};
+
 function App() {
 	//const [count, setCount] = useState(0);
 

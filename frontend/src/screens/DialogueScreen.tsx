@@ -1,3 +1,3 @@
 export default function DialogueScreen() {
-	return <></>;
+	return <>Hello World</>;
 }

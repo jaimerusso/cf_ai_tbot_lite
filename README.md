@@ -9,10 +9,12 @@ A specialized interface showcasing a "lite" version of my **tbot** thesis projec
 **Live Demo:** [https://cf-ai-tbot-lite.pages.dev/home](https://cf-ai-tbot-lite.pages.dev/home)
 
 ## 🧠 Project Core: RAG Architecture
+
 This "lite" version implements a robust **RAG (Retrieval-Augmented Generation)** pipeline. Unlike standard LLM implementations, this system is capable of providing specialized responses based on specific domain knowledge provided by the user anytime.
 
 ### How it works:
-1. **Document Ingestion (Backoffice):** Users can upload specific files (PDFs, text) through the ingestion backoffice. 
+
+1. **Document Ingestion (Backoffice):** Users can upload specific files (PDFs, text) through the ingestion backoffice.
 2. **Vectorization & Storage:** The system processes these documents, converting text into embeddings (vectors) that represent their semantic meaning.
 3. **Contextual Retrieval:** When a user asks a question in the **Dialogue** interface, the system searches the ingested data to find the most relevant snippets of information.
 4. **Augmented Response:** This retrieved context is fed into the LLM (running on Cloudflare Workers AI), allowing it to generate accurate, specialized answers rooted in the provided documents, effectively eliminating hallucinations and providing domain-specific expertise.
@@ -46,4 +48,4 @@ In this project, AI was used as a development "co-pilot" specifically for:
 - **Styling:** Tailwind CSS v4
 - **Infrastructure:** Cloudflare Pages
 - **Backend:** Cloudflare Workers
-- **LLM:** **TBD**
+- **LLM:** Llama 3.3 (lama-3.3-70b-instruct-fp8-fast)

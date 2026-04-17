@@ -8,19 +8,15 @@ import {
 import HomeScreen from "./screens/HomeScreen";
 import DialogueScreen from "./screens/DialogueScreen";
 
-const initialParams = {
-	IP: "https://cf-ai-tbot-lite-backend.itsjaimerusso.workers.dev/",
-};
-
 function App() {
-	//const [count, setCount] = useState(0);
+	const IP = "https://cf-ai-tbot-lite-backend.itsjaimerusso.workers.dev/";
 
 	return (
 		<Router>
 			<Routes>
 				<Route path="/" element={<Navigate to="/home" />} />
 				<Route path="/home" element={<HomeScreen />} />
-				<Route path="/dialogue" element={<DialogueScreen />} />
+				<Route path="/dialogue" element={<DialogueScreen IP={IP} />} />
 				{/* <Route
                     path="/knowledge"
                     element={<KnowledgeScreen IP={IP} />}

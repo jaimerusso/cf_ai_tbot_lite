@@ -13,7 +13,7 @@ export default function HomeScreen() {
 		<div className="flex flex-col items-center mt-7 px-30 gap-10">
 			<div className="flex flex-col items-center gap-10 w-200 | bg-white mb-10 p-10 rounded-lg drop-shadow-xl drop-shadow-cf">
 				<div className="flex flex-col gap-2 items-center">
-					<img src={logo} className="w-xl" />
+					<img src={logo} className="w-xl" alt="CFxtbot logo" />
 					<div className="flex flex-col gap-2 items-center">
 						<p className="size-fit text-center">
 							A specialized interface showcasing a "lite" version

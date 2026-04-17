@@ -16,4 +16,6 @@ html {
 @theme {
 	--color-cf: #f48120;
 	--color-tbot: #f00094;
+	--color-gray: #312f2f;
+	--color-dark-gray: #1f1d1d;
 }

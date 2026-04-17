@@ -1,19 +1,21 @@
 import { Link } from "react-router-dom";
 import write from "../../assets/write.svg";
 import brain from "../../assets/brain.svg";
+import home from "../../assets/home.svg";
 
 export default function Button({
 	icon,
 	text,
 	to,
 }: {
-	icon?: "write" | "brain";
+	icon?: "write" | "brain" | "home";
 	text: string;
 	to?: string;
 }) {
 	const icons = {
 		write,
 		brain,
+		home,
 	};
 
 	const content = (

@@ -9,6 +9,7 @@ declare namespace Cloudflare {
 	interface Env {
 		AI: Ai;
 		MY_DURABLE_OBJECT: DurableObjectNamespace<import('./src/index').MyDurableObject>;
+		CHAT_ROOM: DurableObjectNamespace<import('./src/index').ChatRoom>;
 	}
 }
 interface Env extends Cloudflare.Env {}

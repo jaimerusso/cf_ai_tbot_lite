@@ -1,5 +1,4 @@
 import { DurableObject } from 'cloudflare:workers';
-import { runWithTools } from '@cloudflare/ai-utils';
 import { getAnswer } from './services/conversational/conversational';
 
 /**
@@ -52,27 +51,58 @@ export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
 
-		if (url.pathname === '/dialogue' && request.method === 'POST') {
-			//Logic to build an answer and return to the client
-			try {
-				const body = (await request.json()) as { prompt: string };
-				let [messages, response] = await getAnswer(env, body.prompt);
-
-				//Save messages in the Durable Object (for the future context of the conversation)
-				//...
-
-				return new Response(JSON.stringify(response));
-			} catch (error) {
-				return new Response('Invalid JSON body', { status: 400 });
-			}
+		if (request.headers.get('Upgrade') === 'websocket') {
+			const stub = env.CHAT_ROOM.getByName('default-room');
+			return stub.fetch(request);
 		}
-		if (url.pathname === '/test') {
-			return new Response('Test endpoint is working!');
-			//const stub = env.MY_DURABLE_OBJECT.getByName('foo');
-			//const greeting = await stub.sayHello('world');
-			//return new Response(greeting);
-		}
+
+		// if (url.pathname === '/test') {
+		// 	return new Response('Test endpoint is working!');
+		// 	//const stub = env.MY_DURABLE_OBJECT.getByName('foo');
+		// 	//const greeting = await stub.sayHello('world');
+		// 	//return new Response(greeting);
+		// }
 
 		return new Response('Not found', { status: 404 });
 	},
 } satisfies ExportedHandler<Env>;
+
+// Durable Object: manages WebSocket connections with hibernation
+export class ChatRoom extends DurableObject {
+	constructor(ctx: DurableObjectState, env: Env) {
+		super(ctx, env);
+		// Auto ping/pong without waking the object
+		this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'));
+	}
+
+	async fetch(request: Request): Promise<Response> {
+		const pair = new WebSocketPair();
+		const [client, server] = Object.values(pair);
+
+		// ✅ Good: acceptWebSocket enables hibernation
+		this.ctx.acceptWebSocket(server);
+
+		return new Response(null, { status: 101, webSocket: client });
+	}
+
+	// Called when a message arrives — the object wakes from hibernation if needed
+	async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
+		for (const conn of this.ctx.getWebSockets()) {
+			if (typeof message === 'string') {
+				let [messages, response] = await getAnswer(this.env, message);
+				conn.send(response);
+			} else {
+				conn.send('Invalid message type. Message must be a string!');
+			}
+
+			//Save messages in the Durable Object (for the future context of the conversation)
+			//...
+		}
+	}
+
+	async webSocketClose(ws: WebSocket, code: number, reason: string, wasClean: boolean) {
+		// With web_socket_auto_reply_to_close (compat date >= 2026-04-07), the runtime
+		// auto-replies to Close frames. Calling close() is safe but no longer required.
+		ws.close(code, reason);
+	}
+}

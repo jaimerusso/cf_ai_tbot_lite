@@ -9,15 +9,15 @@
 	"compatibility_date": "2026-04-14",
 	"migrations": [
 		{
-			"new_sqlite_classes": ["ChatRoom", "MyDurableObject"],
+			"new_sqlite_classes": ["ChatRoom", "Dialogues"],
 			"tag": "v2",
 		},
 	],
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "MyDurableObject",
-				"name": "MY_DURABLE_OBJECT",
+				"class_name": "Dialogues",
+				"name": "DIALOGUES",
 			},
 			{
 				"class_name": "ChatRoom",

@@ -1,7 +1,7 @@
 import { tools, searchDocuments } from './tools';
 
 //MESSAGES SETUP
-const start_message: RoleScopedChatInput[] = [
+export const start_message: RoleScopedChatInput[] = [
 	{
 		role: 'system',
 		content: `You are tbot lite, a conversational assistant created by Jaime Russo. Your original version (tbot) was developed for his MSc thesis. This version is a tailored adaptation built for Jaime Russo's application to the Cloudflare Software Engineering Summer Internship (Summer 2026).
@@ -35,6 +35,20 @@ function appendMessage(messages: RoleScopedChatInput[], role: string, content: s
 		content,
 	});
 	return messages;
+}
+
+//Generate a title for the dialogue from the first user prompt
+export async function generateResumee(env: Env, prompt: string): Promise<string> {
+	const messages = [
+		{
+			role: 'system',
+			content: `Summarize the following user prompt into a short title (max 5 words): ${prompt}. \
+			JUST return the title`,
+		},
+	];
+
+	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as { response: string };
+	return response.response;
 }
 
 //Get the intent of the user and return the tool to call (or fallback - generic) and the arguments to call it (or the original prompt)

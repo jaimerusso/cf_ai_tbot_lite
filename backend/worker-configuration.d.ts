@@ -8,7 +8,7 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		AI: Ai;
-		MY_DURABLE_OBJECT: DurableObjectNamespace<import('./src/index').MyDurableObject>;
+		DIALOGUES: DurableObjectNamespace<import('./src/index').Dialogues>;
 		CHAT_ROOM: DurableObjectNamespace<import('./src/index').ChatRoom>;
 	}
 }

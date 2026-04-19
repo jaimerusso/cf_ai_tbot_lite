@@ -30,7 +30,8 @@ export default function Popup({
 						Cancel
 					</a>
 					<a
-						className={`${buttonStyle} bg-${buttonColor}`}
+						style={{ backgroundColor: buttonColor }}
+						className={buttonStyle}
 						onClick={() => buttonFunc?.()}
 					>
 						{buttonText}

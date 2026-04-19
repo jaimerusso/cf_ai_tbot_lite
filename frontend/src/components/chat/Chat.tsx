@@ -1,19 +1,30 @@
-import { useEffect, useRef, useState } from "react";
+import { act, useEffect, useRef, useState } from "react";
 import Input from "./Input";
 import logo from "../../assets/CFxtbot.png";
-import axios from "axios";
+import axios, { formToJSON } from "axios";
 import Messages from "./Messages";
 import Header from "./Header";
+import type { Dialogue } from "../../screens/DialogueScreen";
 
-export interface Message {
+export type Message = {
 	role: string;
 	content: string;
-}
+};
 
-export default function Chat({ IP }: { IP: string }) {
+export default function Chat({
+	IP,
+	activeDialID,
+	setDialogues,
+}: {
+	IP: string;
+	activeDialID: string;
+	setDialogues: React.Dispatch<React.SetStateAction<Dialogue[]>>;
+}) {
 	const [waitingResponse, setWaitingResponse] = useState(false); //State to track if waiting for response from server (loading state)
 	const [messages, setMessages] = useState<Message[]>([]); //Dialogue messages
+	const [title, setTitle] = useState("");
 	const ws = useRef<WebSocket | null>(null);
+	const activeDialIDRef = useRef(activeDialID);
 
 	const sendMessage = (prompt: string) => {
 		const socket = ws.current;
@@ -31,8 +42,13 @@ export default function Chat({ IP }: { IP: string }) {
 
 			setWaitingResponse(true);
 
-			console.log("Sending message:", prompt);
-			socket.send(prompt);
+			console.log(
+				"Sending message:",
+				prompt,
+				" for dialogue: ",
+				activeDialID
+			);
+			socket.send(JSON.stringify({ dialogueId: activeDialID, prompt }));
 		} else {
 			console.log("WebSocket is not open");
 			// ws.current = new WebSocket(`ws://${IP}`);
@@ -41,7 +57,10 @@ export default function Chat({ IP }: { IP: string }) {
 	};
 
 	useEffect(() => {
-		// if (!IP || dialogueID === -1) return;
+		activeDialIDRef.current = activeDialID;
+	}, [activeDialID]);
+
+	useEffect(() => {
 		if (!IP) return;
 
 		const socket = new WebSocket(`ws://${IP}`);
@@ -52,8 +71,7 @@ export default function Chat({ IP }: { IP: string }) {
 		};
 
 		socket.onmessage = (event) => {
-			const response = event.data;
-			console.log("Received message:", response);
+			const { title, response } = JSON.parse(event.data);
 
 			//Update waiting response state
 			setWaitingResponse(false);
@@ -65,6 +83,15 @@ export default function Chat({ IP }: { IP: string }) {
 					content: response,
 				},
 			]);
+			if (title) {
+				setTitle(title);
+				console.log("active dial iD: ", activeDialIDRef.current);
+				setDialogues((prev) =>
+					prev.map((d) =>
+						d.id === activeDialIDRef.current ? { ...d, title } : d
+					)
+				);
+			}
 		};
 
 		socket.onerror = (error) => {
@@ -83,6 +110,18 @@ export default function Chat({ IP }: { IP: string }) {
 		};
 	}, [IP]);
 
+	useEffect(() => {
+		if (activeDialID) {
+			axios.get(`http://${IP}/dialogues/${activeDialID}`).then((res) => {
+				const resDialogue = res.data.dialogue;
+				if (resDialogue) {
+					setMessages(resDialogue.messages);
+					setTitle(resDialogue.title);
+				}
+			});
+		}
+	}, [activeDialID]);
+
 	return (
 		<div className="flex flex-col w-5/6 h-full bg-black relative">
 			<div className="flex-1 absolute top-0 left-0 right-0 bottom-0">
@@ -90,7 +129,7 @@ export default function Chat({ IP }: { IP: string }) {
 					<img src={logo} className="w-xl opacity-50"></img>
 				</div>
 			</div>
-			<Header />
+			<Header title={title} />
 			<Messages messages={messages} waitingResponse={waitingResponse} />
 			<Input sendMessage={sendMessage} />
 		</div>

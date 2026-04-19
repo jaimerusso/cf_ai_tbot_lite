@@ -73,7 +73,7 @@ async function getIntent(env: Env, prompt: string, messages: RoleScopedChatInput
 	}
 }
 
-export async function getAnswer(env: Env, prompt: string, messages = start_message): Promise<[RoleScopedChatInput[], string]> {
+export async function getAnswer(env: Env, prompt: string, messages: RoleScopedChatInput[]): Promise<[RoleScopedChatInput[], string]> {
 	console.log('Prompt received: ', prompt);
 	//Append prompt to messages
 	messages = appendMessage(messages, 'user', prompt);

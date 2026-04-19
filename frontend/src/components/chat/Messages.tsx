@@ -25,16 +25,20 @@ export default function Messages({
 			className="flex flex-col px-5 pb-10 pt-5 relative overflow-y-auto relative z-1 flex-1 mb-3"
 			ref={containerRef}
 		>
-			{messages.map((msg, index) => (
-				<div
-					key={index}
-					className={`flex mb-6 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-				>
-					<div className="rounded-2xl p-3 bg-gray w-fit max-w-[80%]">
-						<p className="text-white">{msg.content}</p>
+			{messages
+				.filter(
+					(msg) => msg.role === "user" || msg.role === "assistant"
+				)
+				.map((msg, index) => (
+					<div
+						key={index}
+						className={`flex mb-6 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+					>
+						<div className="rounded-2xl p-3 bg-gray w-fit max-w-[80%]">
+							<p className="text-white">{msg.content}</p>
+						</div>
 					</div>
-				</div>
-			))}
+				))}
 
 			{waitingResponse && (
 				<div className="flex mb-6 justify-start">

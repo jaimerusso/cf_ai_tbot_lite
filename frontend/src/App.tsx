@@ -10,7 +10,7 @@ import DialogueScreen from "./screens/DialogueScreen";
 import KnowledgeScreen from "./screens/KnowledgeScreen";
 
 function App() {
-	// const IP = "https://cf-ai-tbot-lite-backend.itsjaimerusso.workers.dev/";
+	// const IP = "cf-ai-tbot-lite-backend.itsjaimerusso.workers.dev";
 	const IP = "127.0.0.1:8787";
 
 	return (

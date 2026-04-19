@@ -5,6 +5,7 @@ type Dialogue = {
 	id: string;
 	title: string;
 	messages: RoleScopedChatInput[];
+	lastUpdate: number;
 };
 
 const chatRoomDOName = 'chat';
@@ -19,8 +20,9 @@ export class Dialogues extends DurableObject<Env> {
 		let id = crypto.randomUUID();
 		const dialogue: Dialogue = {
 			id,
-			title: '',
-			messages: start_message,
+			title: 'New chat',
+			messages: structuredClone(start_message),
+			lastUpdate: Date.now(),
 		};
 		await this.ctx.storage.put(id, dialogue);
 		return Response.json({ dialogue });
@@ -28,7 +30,10 @@ export class Dialogues extends DurableObject<Env> {
 
 	async getDialogueIds(): Promise<Response> {
 		const entries = await this.ctx.storage.list<Dialogue>();
-		const dialogues = Array.from(entries.values()).map((d) => ({ id: d.id, title: d.title }));
+		//Sort in descending order by creationDate, so that the most recent dialogue appears first
+		const dialogues = Array.from(entries.values())
+			.sort((a, b) => b.lastUpdate - a.lastUpdate)
+			.map((d) => ({ id: d.id, title: d.title }));
 		return Response.json({ dialogues });
 	}
 
@@ -38,29 +43,30 @@ export class Dialogues extends DurableObject<Env> {
 	}
 
 	//Called from the websocket after answering a prompt
-	async saveMessages(dialogueId: string, messages: RoleScopedChatInput[]): Promise<void> {
+	async saveMessages(dialogueId: string, messages: RoleScopedChatInput[]): Promise<string> {
 		const entry = await this.ctx.storage.get<Dialogue>(dialogueId);
 
 		if (!entry) {
 			console.log('Dialogue was not found so the messages will not be saved!');
-			return;
+			return '';
 		}
 
 		entry.messages = messages;
 
-		if (entry.title === '') {
+		let titleChanged = false;
+		if (entry.title === 'New chat') {
 			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1)?.content;
 			if (typeof lastUserMessage === 'string') {
 				entry.title = await generateResumee(this.env, lastUserMessage);
 			}
+			titleChanged = true;
 		}
+
+		entry.lastUpdate = Date.now();
 
 		await this.ctx.storage.put(dialogueId, entry);
 		console.log('Dialogue was found, messages saved!');
-	}
-
-	async dialogueExists(dialogueId: string): Promise<boolean> {
-		return (await this.ctx.storage.get<Dialogue>(dialogueId)) ? true : false;
+		return titleChanged ? entry.title : '';
 	}
 }
 
@@ -90,10 +96,13 @@ export class ChatRoom extends DurableObject {
 
 			const dialoguesStub = this.env.DIALOGUES.getByName(dialoguesDOName);
 
-			if (await dialoguesStub.dialogueExists(dialogueId)) {
-				let [messages, response] = await getAnswer(this.env, prompt);
-				dialoguesStub.saveMessages(dialogueId, messages);
-				ws.send(response);
+			const getDialogueRes = await dialoguesStub.getDialogue(dialogueId);
+			if (getDialogueRes) {
+				const { dialogue } = (await getDialogueRes.json()) as { dialogue: Dialogue };
+
+				let [messages, response] = await getAnswer(this.env, prompt, dialogue.messages);
+				let title = await dialoguesStub.saveMessages(dialogueId, messages);
+				title === '' ? ws.send(JSON.stringify({ response })) : ws.send(JSON.stringify({ title, response }));
 			} else {
 				ws.send('Invalid dialogueId!');
 			}
@@ -112,49 +121,61 @@ export class ChatRoom extends DurableObject {
 	}
 }
 
+async function handleRequest(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+	const url = new URL(request.url);
+	const dialoguesStub = env.DIALOGUES.getByName(dialoguesDOName);
+
+	const messagesPattern = new URLPattern({ pathname: '/dialogues/:id' });
+	const messagesMatch = messagesPattern.exec(url);
+	if (messagesMatch && request.method === 'GET') {
+		const dialogueId = messagesMatch.pathname.groups.id;
+		return dialoguesStub.getDialogue(dialogueId);
+	}
+
+	const dialoguesPattern = new URLPattern({ pathname: '/dialogues' });
+	if (dialoguesPattern.exec(url) && request.method === 'GET') {
+		return dialoguesStub.getDialogueIds();
+	}
+	if (dialoguesPattern.exec(url) && request.method === 'POST') {
+		return dialoguesStub.newDialogue();
+	}
+
+	if (request.headers.get('Upgrade') === 'websocket') {
+		const chatStub = env.CHAT_ROOM.getByName(chatRoomDOName);
+		return chatStub.fetch(request);
+	}
+
+	return new Response('Not found', { status: 404 });
+}
+
 export default {
 	/**
-	 * This is the standard fetch handler for a Cloudflare Worker
-	 *
-	 * @param request - The request submitted to the Worker from the client
-	 * @param env - The interface to reference bindings declared in wrangler.jsonc
-	 * @param ctx - The execution context of the Worker
-	 * @returns The response to be sent back to the client
-	 *
 	 * This handler routes to:
 	 * -ChatRoom Durable Object for chat interactions via WebSockets
 	 * -Dialogues Durable Object for storing/retrieving messages and dialogues.
 	 */
 	async fetch(request, env, ctx): Promise<Response> {
-		const url = new URL(request.url);
+		const response = await handleRequest(request, env, ctx);
 
-		const dialoguesStub = env.DIALOGUES.getByName(dialoguesDOName);
-
-		// Get Dialogue messages
-		const messagesPattern = new URLPattern({ pathname: '/dialogues/:id' });
-		const messagesMatch = messagesPattern.exec(url);
-		if (messagesMatch && request.method === 'GET') {
-			const dialogueId = messagesMatch.pathname.groups.id;
-			return dialoguesStub.getDialogue(dialogueId);
-		}
-
-		// Get Dialogues
-		const dialoguesPattern = new URLPattern({ pathname: '/dialogues' });
-		if (dialoguesPattern.exec(url) && request.method === 'GET') {
-			return dialoguesStub.getDialogueIds();
-		}
-
-		// New Dialogue
-		if (dialoguesPattern.exec(url) && request.method === 'POST') {
-			return dialoguesStub.newDialogue();
-		}
-
-		// WebSocket
 		if (request.headers.get('Upgrade') === 'websocket') {
-			const chatStub = env.CHAT_ROOM.getByName(chatRoomDOName);
-			return chatStub.fetch(request);
+			return response;
 		}
 
-		return new Response('Not found', { status: 404 });
+		const corsHeaders = {
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+			'Access-Control-Allow-Headers': '*',
+		};
+
+		if (request.method === 'OPTIONS') {
+			return new Response(null, { headers: corsHeaders });
+		}
+
+		//Put all corsHeaders as headers for the response
+		const newResponse = new Response(response.body, response);
+		Object.entries(corsHeaders).forEach(([key, value]) => {
+			newResponse.headers.set(key, value);
+		});
+		return newResponse;
 	},
 } satisfies ExportedHandler<Env>;

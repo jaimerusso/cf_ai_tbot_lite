@@ -60,6 +60,7 @@ export default function Chat({
 
 	useEffect(() => {
 		activeDialIDRef.current = activeDialID;
+		setWaitingResponse(false); //Turn off waiting because the user selected other dialogue
 	}, [activeDialID]);
 
 	useEffect(() => {
@@ -75,24 +76,29 @@ export default function Chat({
 		socket.onmessage = (event) => {
 			const { title, response } = JSON.parse(event.data);
 
-			//Update waiting response state
-			setWaitingResponse(false);
-			//Update messages with assistant response
-			setMessages((prev) => [
-				...prev,
-				{
-					role: "assistant",
-					content: response,
-				},
-			]);
-			if (title) {
-				setTitle(title);
-				console.log("active dial iD: ", activeDialIDRef.current);
-				setDialogues((prev) =>
-					prev.map((d) =>
-						d.id === activeDialIDRef.current ? { ...d, title } : d
-					)
-				);
+			//If waiting, append to messages
+			if (waitingResponse) {
+				//Update waiting response state
+				setWaitingResponse(false);
+				//Update messages with assistant response
+				setMessages((prev) => [
+					...prev,
+					{
+						role: "assistant",
+						content: response,
+					},
+				]);
+				if (title) {
+					setTitle(title);
+					console.log("active dial iD: ", activeDialIDRef.current);
+					setDialogues((prev) =>
+						prev.map((d) =>
+							d.id === activeDialIDRef.current
+								? { ...d, title }
+								: d
+						)
+					);
+				}
 			}
 		};
 
@@ -127,7 +133,7 @@ export default function Chat({
 	}, [activeDialID]);
 
 	return (
-		<div className="flex flex-col w-5/6 h-full bg-black relative">
+		<div className="flex flex-col flex-1 h-full bg-black relative">
 			<div className="flex-1 absolute top-0 left-0 right-0 bottom-0">
 				<div className="flex flex-1 flex-row select-none items-center bg-gradient-to-r from-cf to-tbot justify-center w-full h-full">
 					<img src={logo} className="w-xl opacity-50"></img>

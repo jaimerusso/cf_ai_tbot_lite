@@ -12,11 +12,13 @@ export type Message = {
 };
 
 export default function Chat({
-	IP,
+	httpUrl,
+	wsUrl,
 	activeDialID,
 	setDialogues,
 }: {
-	IP: string;
+	httpUrl: string;
+	wsUrl: string;
 	activeDialID: string;
 	setDialogues: React.Dispatch<React.SetStateAction<Dialogue[]>>;
 }) {
@@ -61,9 +63,9 @@ export default function Chat({
 	}, [activeDialID]);
 
 	useEffect(() => {
-		if (!IP) return;
+		if (!wsUrl) return;
 
-		const socket = new WebSocket(`ws://${IP}`);
+		const socket = new WebSocket(wsUrl);
 		ws.current = socket;
 
 		socket.onopen = () => {
@@ -108,11 +110,11 @@ export default function Chat({
 			}
 			ws.current = null;
 		};
-	}, [IP]);
+	}, [wsUrl]);
 
 	useEffect(() => {
 		if (activeDialID) {
-			axios.get(`http://${IP}/dialogues/${activeDialID}`).then((res) => {
+			axios.get(`${httpUrl}/dialogues/${activeDialID}`).then((res) => {
 				const resDialogue = res.data.dialogue;
 				if (resDialogue) {
 					setMessages(resDialogue.messages);

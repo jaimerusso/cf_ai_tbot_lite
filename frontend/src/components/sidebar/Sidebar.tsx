@@ -8,16 +8,16 @@ export default function Sidebar({
 	activeDialID,
 	selectDialogue,
 	setDialogues,
-	IP,
+	httpUrl,
 }: {
 	dialogues: Dialogue[];
 	activeDialID: string;
 	selectDialogue: (id: string) => void;
 	setDialogues: React.Dispatch<React.SetStateAction<Dialogue[]>>;
-	IP: string;
+	httpUrl: string;
 }) {
 	const newDialogue = () => {
-		axios.post(`http://${IP}/dialogues`).then((res) => {
+		axios.post(`${httpUrl}/dialogues`).then((res) => {
 			const resDialogue = res.data.dialogue as Dialogue;
 			if (resDialogue) {
 				setDialogues((prev) => [

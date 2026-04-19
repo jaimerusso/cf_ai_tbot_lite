@@ -8,14 +8,20 @@ export type Dialogue = {
 	title: string;
 };
 
-export default function DialogueScreen({ IP }: { IP: string }) {
+export default function DialogueScreen({
+	httpUrl,
+	wsUrl,
+}: {
+	httpUrl: string;
+	wsUrl: string;
+}) {
 	const [dialogues, setDialogues] = useState<Dialogue[]>([]);
 	const [activeDialID, setActiveDialID] = useState("");
 
 	useEffect(() => {
 		document.title = "Dialogue";
 
-		axios.get(`http://${IP}/dialogues`).then((res) => {
+		axios.get(`${httpUrl}/dialogues`).then((res) => {
 			const resDialogues = res.data.dialogues;
 			if (resDialogues) {
 				setDialogues(resDialogues);
@@ -36,10 +42,11 @@ export default function DialogueScreen({ IP }: { IP: string }) {
 				activeDialID={activeDialID}
 				selectDialogue={setActiveDialID}
 				setDialogues={setDialogues}
-				IP={IP}
+				httpUrl={httpUrl}
 			/>
 			<Chat
-				IP={IP}
+				httpUrl={httpUrl}
+				wsUrl={wsUrl}
 				activeDialID={activeDialID}
 				setDialogues={setDialogues}
 			/>

@@ -15,6 +15,8 @@ function App() {
 	const httpUrl = `${isSecure ? "https" : "http"}://${IP}`;
 	const wsUrl = `${isSecure ? "wss" : "ws"}://${IP}`;
 
+	console.log(IP);
+
 	return (
 		<Router>
 			<Routes>

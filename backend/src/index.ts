@@ -42,6 +42,11 @@ export class Dialogues extends DurableObject<Env> {
 		return new Response(JSON.stringify({ dialogue: entry }));
 	}
 
+	async deleteDialogue(dialogueId: string): Promise<Response> {
+		await this.ctx.storage.delete(dialogueId);
+		return new Response(JSON.stringify({ dialogueId }));
+	}
+
 	//Called from the websocket after answering a prompt
 	async saveMessages(dialogueId: string, messages: RoleScopedChatInput[]): Promise<string> {
 		const entry = await this.ctx.storage.get<Dialogue>(dialogueId);
@@ -130,6 +135,11 @@ async function handleRequest(request: Request, env: Env, ctx: ExecutionContext):
 	if (messagesMatch && request.method === 'GET') {
 		const dialogueId = messagesMatch.pathname.groups.id;
 		return dialoguesStub.getDialogue(dialogueId);
+	}
+
+	if (messagesMatch && request.method === 'DELETE') {
+		const dialogueId = messagesMatch.pathname.groups.id;
+		return dialoguesStub.deleteDialogue(dialogueId);
 	}
 
 	const dialoguesPattern = new URLPattern({ pathname: '/dialogues' });

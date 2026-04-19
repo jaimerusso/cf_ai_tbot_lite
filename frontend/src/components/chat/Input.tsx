@@ -1,11 +1,11 @@
 import { useState } from "react";
 import send from "../../assets/send.svg";
 
-interface InputProps {
+export default function Input({
+	sendMessage,
+}: {
 	sendMessage: (prompt: string) => void;
-}
-
-export default function Input({ sendMessage }: InputProps) {
+}) {
 	const [input, setInput] = useState("");
 
 	const handleSend = () => {
@@ -17,7 +17,7 @@ export default function Input({ sendMessage }: InputProps) {
 	};
 
 	return (
-		<div className="relative z-1">
+		<div className="relative z-1 select-none">
 			<div className="flex flex-row w-full absolute bottom-0 w-full h-fill px-4 pb-3">
 				<div className="bg-gray flex-1 flex flex-row rounded-full h-full px-4 py-3 gap-4">
 					<input
@@ -30,7 +30,7 @@ export default function Input({ sendMessage }: InputProps) {
 								handleSend();
 							}
 						}}
-					></input>
+					/>
 					<a
 						className="flex hover:cursor-pointer"
 						onClick={handleSend}

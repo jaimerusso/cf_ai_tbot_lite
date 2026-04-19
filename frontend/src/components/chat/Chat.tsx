@@ -121,13 +121,15 @@ export default function Chat({
 					setTitle(resDialogue.title);
 				}
 			});
+		} else {
+			setTitle("");
 		}
 	}, [activeDialID]);
 
 	return (
 		<div className="flex flex-col w-5/6 h-full bg-black relative">
 			<div className="flex-1 absolute top-0 left-0 right-0 bottom-0">
-				<div className="flex flex-1 flex-row pointer-events-none items-center bg-gradient-to-r from-cf to-tbot justify-center w-full h-full">
+				<div className="flex flex-1 flex-row select-none items-center bg-gradient-to-r from-cf to-tbot justify-center w-full h-full">
 					<img src={logo} className="w-xl opacity-50"></img>
 				</div>
 			</div>

@@ -23,7 +23,7 @@ export default function DialogueScreen({
 
 		axios.get(`${httpUrl}/dialogues`).then((res) => {
 			const resDialogues = res.data.dialogues;
-			if (resDialogues) {
+			if (resDialogues.length > 0) {
 				setDialogues(resDialogues);
 				console.log(resDialogues[0].id);
 				setActiveDialID(resDialogues[0].id);
@@ -31,12 +31,8 @@ export default function DialogueScreen({
 		});
 	}, []);
 
-	useEffect(() => {
-		console.log(dialogues);
-	}, [dialogues]);
-
 	return (
-		<div className="flex flex-row h-screen w-full">
+		<div className="flex flex-row h-screen w-full relative">
 			<Sidebar
 				dialogues={dialogues}
 				activeDialID={activeDialID}

@@ -65,6 +65,7 @@ export default function Sidebar({
 							icon="write"
 							text="New chat"
 							func={newDialogue}
+							active={activeDialID === "" ? true : false}
 						/>
 					</div>
 				</div>

@@ -17,17 +17,18 @@ export default function Chat({
 	activeDialID,
 	setDialogues,
 	newDialogue,
+	dialogueTitle,
 }: {
 	httpUrl: string;
 	wsUrl: string;
 	activeDialID: string;
 	setDialogues: React.Dispatch<React.SetStateAction<Dialogue[]>>;
 	newDialogue: () => Promise<string>;
+	dialogueTitle: string;
 }) {
 	const [waitingResponse, setWaitingResponse] = useState(false); //State to track if waiting for response from server (loading state)
 	const [messages, setMessages] = useState<Message[]>([]); //Dialogue messages
 	const [title, setTitle] = useState("");
-	const [isFirst, setIsFirst] = useState(false);
 	const ws = useRef<WebSocket | null>(null);
 	const activeDialIDRef = useRef(activeDialID);
 	const waitingResponseRef = useRef(false);
@@ -134,6 +135,10 @@ export default function Chat({
 			setTitle("");
 		}
 	}, [activeDialID]);
+
+	useEffect(() => {
+		setTitle(dialogueTitle);
+	}, [dialogueTitle]);
 
 	return (
 		<div className="flex flex-col flex-1 h-full bg-black relative">

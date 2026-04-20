@@ -21,7 +21,9 @@ export default function Input({
 	return (
 		<div className="relative z-1 select-none">
 			<div className="flex flex-row w-full absolute bottom-0 h-fill px-4 pb-3">
-				<div className="bg-gray flex-1 flex flex-row rounded-full h-full px-4 py-3 gap-4">
+				<div
+					className={`bg-gray flex-1 flex flex-row rounded-full h-full px-4 py-3 gap-4 ${waitingResponse ? "cursor-not-allowed" : ""}`}
+				>
 					<input
 						disabled={waitingResponse}
 						className="w-full text-white px-2 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
@@ -35,8 +37,8 @@ export default function Input({
 						}}
 					/>
 					<a
-						className="flex hover:cursor-pointer"
-						onClick={handleSend}
+						className={`flex ${waitingResponse ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+						onClick={waitingResponse ? handleSend : () => {}}
 					>
 						<img src={send} alt="Send" />
 					</a>

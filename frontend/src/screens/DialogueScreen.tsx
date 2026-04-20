@@ -17,6 +17,7 @@ export default function DialogueScreen({
 }) {
 	const [dialogues, setDialogues] = useState<Dialogue[]>([]);
 	const [activeDialID, setActiveDialID] = useState("");
+	const [dialogueTitle, setDialogueTitle] = useState("");
 
 	useEffect(() => {
 		document.title = "Dialogue";
@@ -31,6 +32,7 @@ export default function DialogueScreen({
 		});
 	}, []);
 
+	//New dialogue request and setup
 	const newDialogue = async (): Promise<string> => {
 		const res = await axios.post(`${httpUrl}/dialogues`);
 		const resDialogue = res.data.dialogue as Dialogue;
@@ -39,10 +41,16 @@ export default function DialogueScreen({
 				{ id: resDialogue.id, title: resDialogue.title },
 				...prev,
 			]);
+			setDialogueTitle(resDialogue.title);
 			setActiveDialID(resDialogue.id);
 			return resDialogue.id;
 		}
 		return "";
+	};
+
+	//New dialogue selection
+	const newDialoguev2 = () => {
+		setActiveDialID("");
 	};
 
 	return (
@@ -53,7 +61,7 @@ export default function DialogueScreen({
 				selectDialogue={setActiveDialID}
 				setDialogues={setDialogues}
 				httpUrl={httpUrl}
-				newDialogue={newDialogue}
+				newDialogue={newDialoguev2}
 			/>
 			<Chat
 				httpUrl={httpUrl}
@@ -61,6 +69,7 @@ export default function DialogueScreen({
 				activeDialID={activeDialID}
 				setDialogues={setDialogues}
 				newDialogue={newDialogue}
+				dialogueTitle={dialogueTitle}
 			/>
 		</div>
 	);

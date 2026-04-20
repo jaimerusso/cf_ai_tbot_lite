@@ -48,7 +48,7 @@ export default function Sidebar({
 
 	return (
 		<>
-			<div className="w-64 bg-dark-gray flex flex-col ">
+			<div className="w-1/3 max-w-75 bg-dark-gray flex flex-col ">
 				<div className="flex flex-col gap-1 pt-4 pb-2">
 					<div className="px-2">
 						<Button to="/home" icon="home" text="Home" />

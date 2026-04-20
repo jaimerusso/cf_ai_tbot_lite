@@ -10,7 +10,7 @@ export const start_message: RoleScopedChatInput[] = [
 		- Keep a casual and informal tone, but grammatically correct.
 
 		TOOLS:
-		- You have access to two functions: searchDocuments and genericRes.
+		- You have access to the function searchDocuments.
 		- Call searchDocuments when the user asks something that matches its description.
 		- Call genericRes for everything else. It is your fallback and must always be called if searchDocuments is not applicable.
 		- Never skip calling a tool. Always call one of the two.
@@ -73,6 +73,7 @@ async function getIntent(env: Env, prompt: string, messages: RoleScopedChatInput
 	}
 }
 
+//TODO: TER UMA MENSAGEM DE SISTEMA DIFERENTE PARA CADA TIPO DE INTERAÇÂO (GET INTENT, ANSWER, ETC ETC ETC)?
 export async function getAnswer(env: Env, prompt: string, messages: RoleScopedChatInput[]): Promise<[RoleScopedChatInput[], string]> {
 	console.log('Prompt received: ', prompt);
 	//Append prompt to messages

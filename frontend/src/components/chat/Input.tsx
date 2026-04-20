@@ -3,8 +3,10 @@ import send from "../../assets/send.svg";
 
 export default function Input({
 	sendMessage,
+	waitingResponse,
 }: {
 	sendMessage: (prompt: string) => void;
+	waitingResponse: boolean;
 }) {
 	const [input, setInput] = useState("");
 
@@ -18,10 +20,11 @@ export default function Input({
 
 	return (
 		<div className="relative z-1 select-none">
-			<div className="flex flex-row w-full absolute bottom-0 w-full h-fill px-4 pb-3">
+			<div className="flex flex-row w-full absolute bottom-0 h-fill px-4 pb-3">
 				<div className="bg-gray flex-1 flex flex-row rounded-full h-full px-4 py-3 gap-4">
 					<input
-						className="w-full text-white px-2 outline-none "
+						disabled={waitingResponse}
+						className="w-full text-white px-2 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
 						placeholder="Ask me anything..."
 						value={input}
 						onChange={(e) => setInput(e.target.value)}

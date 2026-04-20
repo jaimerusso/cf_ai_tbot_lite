@@ -31,6 +31,20 @@ export default function DialogueScreen({
 		});
 	}, []);
 
+	const newDialogue = async (): Promise<string> => {
+		const res = await axios.post(`${httpUrl}/dialogues`);
+		const resDialogue = res.data.dialogue as Dialogue;
+		if (resDialogue) {
+			setDialogues((prev) => [
+				{ id: resDialogue.id, title: resDialogue.title },
+				...prev,
+			]);
+			setActiveDialID(resDialogue.id);
+			return resDialogue.id;
+		}
+		return "";
+	};
+
 	return (
 		<div className="flex flex-row h-screen w-full relative">
 			<Sidebar
@@ -39,12 +53,14 @@ export default function DialogueScreen({
 				selectDialogue={setActiveDialID}
 				setDialogues={setDialogues}
 				httpUrl={httpUrl}
+				newDialogue={newDialogue}
 			/>
 			<Chat
 				httpUrl={httpUrl}
 				wsUrl={wsUrl}
 				activeDialID={activeDialID}
 				setDialogues={setDialogues}
+				newDialogue={newDialogue}
 			/>
 		</div>
 	);

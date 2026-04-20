@@ -34,7 +34,7 @@ export default function Button({
 	const content = (
 		<div className={style}>
 			{icon && (
-				<img src={icons[icon]} alt={text} className="w-[20px] h-auto" />
+				<img src={icons[icon]} alt={text} className="w-5 h-auto" />
 			)}
 			<p
 				className={`text-white text-l size-fit truncate ${deletable ? "group-hover:pr-6" : ""}`}
@@ -45,7 +45,7 @@ export default function Button({
 				<img
 					src={trash}
 					alt=""
-					className="h-[24px] absolute opacity-0 group-hover:opacity-100 right-3 top-1 display-none"
+					className="h-6 absolute opacity-0 group-hover:opacity-100 right-3 top-1 display-none"
 					onClick={(e) => {
 						e.stopPropagation();
 						deleteFunc?.();

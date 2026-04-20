@@ -16,52 +16,39 @@ export default function Chat({
 	wsUrl,
 	activeDialID,
 	setDialogues,
+	newDialogue,
 }: {
 	httpUrl: string;
 	wsUrl: string;
 	activeDialID: string;
 	setDialogues: React.Dispatch<React.SetStateAction<Dialogue[]>>;
+	newDialogue: () => Promise<string>;
 }) {
 	const [waitingResponse, setWaitingResponse] = useState(false); //State to track if waiting for response from server (loading state)
 	const [messages, setMessages] = useState<Message[]>([]); //Dialogue messages
 	const [title, setTitle] = useState("");
+	const [isFirst, setIsFirst] = useState(false);
 	const ws = useRef<WebSocket | null>(null);
 	const activeDialIDRef = useRef(activeDialID);
+	const waitingResponseRef = useRef(false);
+	const isNewDialogue = useRef(false);
 
-	const sendMessage = (prompt: string) => {
+	const sendMessage = async (prompt: string) => {
+		let dialogueId = activeDialID;
+
+		if (!dialogueId) {
+			isNewDialogue.current = true;
+			dialogueId = await newDialogue();
+		}
+
 		const socket = ws.current;
-
-		//Send message if socket is open
-		if (socket && socket.readyState === WebSocket.OPEN) {
-			//Update messages with user prompt
-			setMessages((prev) => [
-				...prev,
-				{
-					role: "user",
-					content: prompt,
-				},
-			]);
-
+		if (socket && socket.readyState === WebSocket.OPEN && dialogueId) {
+			setMessages((prev) => [...prev, { role: "user", content: prompt }]);
 			setWaitingResponse(true);
-
-			console.log(
-				"Sending message:",
-				prompt,
-				" for dialogue: ",
-				activeDialID
-			);
-			socket.send(JSON.stringify({ dialogueId: activeDialID, prompt }));
-		} else {
-			console.log("WebSocket is not open");
-			// ws.current = new WebSocket(`ws://${IP}`);
-			// ws.current.send(prompt);
+			waitingResponseRef.current = true;
+			socket.send(JSON.stringify({ dialogueId, prompt }));
 		}
 	};
-
-	useEffect(() => {
-		activeDialIDRef.current = activeDialID;
-		setWaitingResponse(false); //Turn off waiting because the user selected other dialogue
-	}, [activeDialID]);
 
 	useEffect(() => {
 		if (!wsUrl) return;
@@ -75,11 +62,14 @@ export default function Chat({
 
 		socket.onmessage = (event) => {
 			const { title, response } = JSON.parse(event.data);
+			console.log("waiting res: ", waitingResponse);
 
 			//If waiting, append to messages
-			if (waitingResponse) {
+			if (waitingResponseRef.current) {
+				console.log("entered here!");
 				//Update waiting response state
 				setWaitingResponse(false);
+				waitingResponseRef.current = false;
 				//Update messages with assistant response
 				setMessages((prev) => [
 					...prev,
@@ -90,7 +80,6 @@ export default function Chat({
 				]);
 				if (title) {
 					setTitle(title);
-					console.log("active dial iD: ", activeDialIDRef.current);
 					setDialogues((prev) =>
 						prev.map((d) =>
 							d.id === activeDialIDRef.current
@@ -118,16 +107,30 @@ export default function Chat({
 		};
 	}, [wsUrl]);
 
+	//Get and update selected dialogue
+	const getDialogue = async () => {
+		console.log(activeDialID);
+		await axios.get(`${httpUrl}/dialogues/${activeDialID}`).then((res) => {
+			const resDialogue = res.data.dialogue;
+			if (resDialogue) {
+				setMessages(resDialogue.messages);
+				setTitle(resDialogue.title);
+			}
+		});
+	};
+
 	useEffect(() => {
+		activeDialIDRef.current = activeDialID;
+		if (isNewDialogue.current) {
+			isNewDialogue.current = false;
+			return;
+		}
 		if (activeDialID) {
-			axios.get(`${httpUrl}/dialogues/${activeDialID}`).then((res) => {
-				const resDialogue = res.data.dialogue;
-				if (resDialogue) {
-					setMessages(resDialogue.messages);
-					setTitle(resDialogue.title);
-				}
-			});
+			getDialogue();
+			setWaitingResponse(false);
+			waitingResponseRef.current = false;
 		} else {
+			setMessages([]);
 			setTitle("");
 		}
 	}, [activeDialID]);
@@ -135,13 +138,16 @@ export default function Chat({
 	return (
 		<div className="flex flex-col flex-1 h-full bg-black relative">
 			<div className="flex-1 absolute top-0 left-0 right-0 bottom-0">
-				<div className="flex flex-1 flex-row select-none items-center bg-gradient-to-r from-cf to-tbot justify-center w-full h-full">
+				<div className="flex flex-1 flex-row select-none items-center bg-linear-to-r from-cf to-tbot justify-center w-full h-full">
 					<img src={logo} className="w-xl opacity-50"></img>
 				</div>
 			</div>
 			<Header title={title} />
 			<Messages messages={messages} waitingResponse={waitingResponse} />
-			<Input sendMessage={sendMessage} />
+			<Input
+				sendMessage={sendMessage}
+				waitingResponse={waitingResponse}
+			/>
 		</div>
 	);
 }

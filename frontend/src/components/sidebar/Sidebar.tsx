@@ -10,29 +10,17 @@ export default function Sidebar({
 	selectDialogue,
 	setDialogues,
 	httpUrl,
+	newDialogue,
 }: {
 	dialogues: Dialogue[];
 	activeDialID: string;
 	selectDialogue: (id: string) => void;
 	setDialogues: React.Dispatch<React.SetStateAction<Dialogue[]>>;
 	httpUrl: string;
+	newDialogue: () => void;
 }) {
 	const [popup, setPopup] = useState(false);
 	const [delDialogue, setDelDialogue] = useState<Dialogue>();
-
-	const newDialogue = () => {
-		axios.post(`${httpUrl}/dialogues`).then((res) => {
-			const resDialogue = res.data.dialogue as Dialogue;
-			if (resDialogue) {
-				setDialogues((prev) => [
-					{ id: resDialogue.id, title: resDialogue.title },
-					...prev,
-				]);
-
-				selectDialogue(resDialogue.id);
-			}
-		});
-	};
 
 	const confirmDelete = (id: string, title: string) => {
 		setDelDialogue({ id, title });

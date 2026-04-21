@@ -1,4 +1,5 @@
 # 🏗️ PROJECT UNDER DEVELOPMENT 🏗️
+![CFxtbot](https://github.com/jaimerusso/cf_ai_tbot_lite/blob/main/frontend/src/assets/CFxtbot.png?raw=true)
 
 ---
 

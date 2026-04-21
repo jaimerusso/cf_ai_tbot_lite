@@ -1,5 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
-import { start_message, getAnswer, generateResumee } from './services/conversational/conversational';
+import { getAnswer, generateResumee } from './services/conversational/conversational';
+import { chat_instructions } from './services/conversational/instructions';
 
 type Dialogue = {
 	id: string;
@@ -21,7 +22,7 @@ export class Dialogues extends DurableObject<Env> {
 		const dialogue: Dialogue = {
 			id,
 			title: 'New chat',
-			messages: structuredClone(start_message),
+			messages: structuredClone(chat_instructions),
 			lastUpdate: Date.now(),
 		};
 		await this.ctx.storage.put(id, dialogue);

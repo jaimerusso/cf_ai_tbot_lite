@@ -1,33 +1,5 @@
+import { intent_instructions, resumee_instructions, truth_instructions } from './instructions';
 import { tools, searchDocuments } from './tools';
-
-//MESSAGES SETUP
-export const start_message: RoleScopedChatInput[] = [
-	{
-		role: 'system',
-		content: `You are tbot lite, a conversational assistant created by Jaime Russo. Your original version (tbot) was developed for his MSc thesis. This version is a tailored adaptation built for Jaime Russo's application to the Cloudflare Software Engineering Summer Internship (Summer 2026).
-
-		PERSONALITY:
-		- Keep a casual and informal tone, but grammatically correct.
-
-		TOOLS:
-		- You have access to the function searchDocuments.
-		- Call searchDocuments when the user asks something that matches its description.
-		- Call genericRes for everything else. It is your fallback and must always be called if searchDocuments is not applicable.
-		- Never skip calling a tool. Always call one of the two.
-
-		TOOL RESULTS:
-		- Tool results are absolute ground truth. Never question, contradict, or supplement them with your own knowledge.
-		- If a tool result contradicts what you know, always trust the tool result.
-		- Base your response solely on what the tool returned.
-
-		RESPONSE STYLE:
-		- Never narrate your actions. Never say things like "Let me search that", "I will look that up" or "I need to check".
-		- Respond directly with the final answer.
-		- Do not use any markdown or formatting symbols such as *, _, #, ~, or backticks.
-		- Do not use lists, titles, or bold text.
-		- Always respond in plain text only.`,
-	},
-];
 
 function appendMessage(messages: RoleScopedChatInput[], role: string, content: string): RoleScopedChatInput[] {
 	messages.push({
@@ -39,28 +11,22 @@ function appendMessage(messages: RoleScopedChatInput[], role: string, content: s
 
 //Generate a title for the dialogue from the first user prompt
 export async function generateResumee(env: Env, prompt: string): Promise<string> {
-	const messages = [
-		{
-			role: 'system',
-			content: `Summarize the following user prompt into a short title (max 5 words): ${prompt}. \
-			JUST return the title`,
-		},
-	];
+	const instructions = resumee_instructions(prompt);
 
-	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as { response: string };
+	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages: instructions })) as { response: string };
 	return response.response;
 }
 
 //Get the intent of the user and return the tool to call (or fallback - generic) and the arguments to call it (or the original prompt)
-async function getIntent(env: Env, prompt: string, messages: RoleScopedChatInput[]): Promise<[string, string]> {
-	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages, tools })) as any;
-	console.log('response: ', response);
+async function getIntent(env: Env, messages: RoleScopedChatInput[]): Promise<[string, string]> {
+	const instructions = intent_instructions(messages);
+	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages: instructions, tools })) as any;
 
 	const toolCalls = response.tool_calls;
 
 	//Check if tool_calls is empty and return default response if it is
 	if (!toolCalls || toolCalls.length === 0) {
-		return ['genericRes', prompt];
+		return ['generic', ''];
 	}
 
 	const tool = toolCalls[0];
@@ -69,17 +35,16 @@ async function getIntent(env: Env, prompt: string, messages: RoleScopedChatInput
 		case 'searchDocuments':
 			return [tool.name, tool.arguments.query];
 		default:
-			return [tool.name, prompt];
+			return [tool.name, ''];
 	}
 }
 
 //TODO: TER UMA MENSAGEM DE SISTEMA DIFERENTE PARA CADA TIPO DE INTERAÇÂO (GET INTENT, ANSWER, ETC ETC ETC)?
 export async function getAnswer(env: Env, prompt: string, messages: RoleScopedChatInput[]): Promise<[RoleScopedChatInput[], string]> {
-	console.log('Prompt received: ', prompt);
 	//Append prompt to messages
 	messages = appendMessage(messages, 'user', prompt);
 
-	let [toolName, toolArgs] = await getIntent(env, prompt, messages);
+	let [toolName, toolArgs] = await getIntent(env, messages);
 
 	console.log('toolName: ', toolName);
 	console.log('toolArgs: ', toolArgs);
@@ -89,13 +54,11 @@ export async function getAnswer(env: Env, prompt: string, messages: RoleScopedCh
 		//TODO: RAG Pipeline - get the relevant information from the documents.
 		let searchResult = searchDocuments({ query: toolArgs });
 		console.log(searchResult);
+
 		//TODO: Assign new system prompt to answer to the prompt, based in the information retrieved from the RAG Pipeline
 		messages = appendMessage(messages, 'tool', searchResult);
-		messages = appendMessage(
-			messages,
-			'user',
-			'Using ONLY the information provided by the tool above, rephrase it in a natural and conversational way. Do not add, remove or contradict any information, unless it is related.',
-		);
+		messages = truth_instructions(messages);
+		console.log('DIALOGUE: ', messages);
 	}
 
 	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;

@@ -56,17 +56,13 @@ export default function HomeScreen() {
 						</p>
 					</div>
 				</div>
-				<div className="flex flex-col items-center gap-7 size-fit">
+				<div className="flex flex-row justify-center items-center gap-7 h-fit w-full relative">
 					<Button
 						link="/knowledge"
-						text="Document ingestion"
+						text="Knowledge base"
 						color="cf"
 					/>
-					<Button
-						link="/dialogue"
-						text="Dialogue chat"
-						color="tbot"
-					/>
+					<Button link="/dialogue" text="Chat" color="tbot" />
 				</div>
 			</div>
 		</div>

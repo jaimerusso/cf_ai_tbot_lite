@@ -2,13 +2,7 @@ import { intent_instructions, resumee_instructions, truth_instructions } from '.
 import { tools, searchDocuments } from './tools';
 import { env, WorkflowEntrypoint, WorkflowStep } from 'cloudflare:workers';
 import type { WorkflowEvent } from 'cloudflare:workers';
-
-export type Dialogue = {
-	id: string;
-	title: string;
-	messages: RoleScopedChatInput[];
-	lastUpdate: number;
-};
+import type { Dialogue } from '../../durable-objects/dialoguesDO';
 
 export type ChatParams = { dialogueId: string; prompt: string; dialoguesDOName: string };
 

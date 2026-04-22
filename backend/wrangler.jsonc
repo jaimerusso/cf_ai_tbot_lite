@@ -23,6 +23,10 @@
 				"class_name": "ChatRoom",
 				"name": "CHAT_ROOM",
 			},
+			{
+				"class_name": "Map",
+				"name": "MAP",
+			},
 		],
 	},
 	"workflows": [

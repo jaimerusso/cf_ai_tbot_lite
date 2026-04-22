@@ -17,6 +17,19 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 		});
 		console.log('Generated embedding:', embedding);
 
+		//Step 2: Insert the embedding and text into the vector database
+		const id = await step.do(`insert-vector`, async () => {
+			const id = crypto.randomUUID();
+			env.VECTORIZE.insert([
+				{
+					id,
+					values: embedding,
+					metadata: { text },
+				},
+			]);
+			return id;
+		});
+
 		return 'All cars are black.';
 	}
 }

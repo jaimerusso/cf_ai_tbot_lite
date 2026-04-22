@@ -14,6 +14,7 @@ export type ChatParams = { dialogueId: string; prompt: string; dialoguesDOName: 
 
 export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 	async run(event: WorkflowEvent<ChatParams>, step: WorkflowStep) {
+		console.log('\n\nStarting Chat Workflow...');
 		const { dialogueId, prompt, dialoguesDOName } = event.payload;
 		const dialoguesStub = this.env.DIALOGUES.getByName(dialoguesDOName);
 
@@ -34,18 +35,19 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 		//Step 3: Understand the user's intent and decide if a tool call is needed
 		console.log("Step 3: Understand the user's intent and decide if a tool call is needed");
 		const [toolName, toolArgs] = await step.do('get-intent', async () => {
-			return await getIntent(env, messages);
+			return await getIntent(messages);
 		});
 
 		//Step 4: Search documents if needed
 		console.log('Step 4: Search documents if needed');
 		const searchResult = await step.do('search-documents', async () => {
 			if (toolName === 'searchDocuments') {
-				//TODO: RAG Pipeline - get the relevant information from the documents.
-				return searchDocuments({ query: toolArgs });
+				return await searchDocuments({ query: toolArgs });
 			}
 			return null;
 		});
+
+		console.log('Tool result CHAT WORKFLOW: ', searchResult);
 
 		//Step 4.1: Append tool result if Step 4 was sucessfully performed
 		console.log('Step 4.1: Append tool result if Step 4 was sucessfully performed');
@@ -77,7 +79,7 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 		});
 
 		//Workflow completed
-		console.log('Workflow completed\nresponse: ', finalResponse, '\ntitle: ', title);
+		console.log('Workflow completed\nresponse: ', finalResponse, '\ntitle: ', title, '\n\n');
 		return { finalResponse, title };
 	}
 }
@@ -92,7 +94,7 @@ function appendMessage(messages: RoleScopedChatInput[], role: string, content: s
 }
 
 //Generate a title for the dialogue from the first user prompt
-export async function generateResumee(env: Env, prompt: string): Promise<string> {
+export async function generateResumee(prompt: string): Promise<string> {
 	const instructions = resumee_instructions(prompt);
 
 	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages: instructions })) as { response: string };
@@ -100,7 +102,7 @@ export async function generateResumee(env: Env, prompt: string): Promise<string>
 }
 
 //Get the intent of the user and return the tool to call (or fallback - generic) and the arguments to call it (or the original prompt)
-async function getIntent(env: Env, messages: RoleScopedChatInput[]): Promise<[string, string]> {
+async function getIntent(messages: RoleScopedChatInput[]): Promise<[string, string]> {
 	const instructions = intent_instructions(messages);
 	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages: instructions, tools })) as any;
 
@@ -119,35 +121,4 @@ async function getIntent(env: Env, messages: RoleScopedChatInput[]): Promise<[st
 		default:
 			return [tool.name, ''];
 	}
-}
-
-export async function getAnswer(env: Env, prompt: string, messages: RoleScopedChatInput[]): Promise<[RoleScopedChatInput[], string]> {
-	//Append prompt to messages
-	messages = appendMessage(messages, 'user', prompt);
-
-	let [toolName, toolArgs] = await getIntent(env, messages);
-
-	console.log('toolName: ', toolName);
-	console.log('toolArgs: ', toolArgs);
-
-	//Check if it detected searchDocuments toolcall
-	if (toolName === 'searchDocuments') {
-		//TODO: RAG Pipeline - get the relevant information from the documents.
-		let searchResult = searchDocuments({ query: toolArgs });
-		console.log(searchResult);
-
-		//TODO: Assign new system prompt to answer to the prompt, based in the information retrieved from the RAG Pipeline
-		messages = appendMessage(messages, 'tool', searchResult);
-		messages = truth_instructions(messages);
-		console.log('DIALOGUE: ', messages);
-	}
-
-	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
-
-	console.log('Final response: ', response);
-
-	let finalRes = response.response;
-	//Append response to messages and return both
-	messages = appendMessage(messages, 'assistant', finalRes);
-	return [messages, finalRes];
 }

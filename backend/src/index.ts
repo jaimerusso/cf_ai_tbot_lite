@@ -1,8 +1,9 @@
 import { DurableObject } from 'cloudflare:workers';
-import { getAnswer, generateResumee } from './services/conversational/conversational';
-import { chat_instructions } from './services/conversational/instructions';
-import type { Dialogue, ChatParams } from './services/conversational/conversational';
-export { ChatWorkflow } from './services/conversational/conversational';
+import { generateResumee } from './ai/conversational/conversational';
+import { chat_instructions } from './ai/conversational/instructions';
+import type { Dialogue, ChatParams } from './ai/conversational/conversational';
+export { ChatWorkflow } from './ai/conversational/conversational';
+export { SearchWorkflow } from './ai/rag/search';
 
 const chatRoomDOName = 'chat';
 const dialoguesDOName = 'dialogues';
@@ -58,7 +59,7 @@ export class Dialogues extends DurableObject<Env> {
 		if (entry.title === 'New chat') {
 			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1)?.content;
 			if (typeof lastUserMessage === 'string') {
-				entry.title = await generateResumee(this.env, lastUserMessage);
+				entry.title = await generateResumee(lastUserMessage);
 			}
 			titleChanged = true;
 		}

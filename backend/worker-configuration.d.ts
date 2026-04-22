@@ -10,7 +10,10 @@ declare namespace Cloudflare {
 		AI: Ai;
 		DIALOGUES: DurableObjectNamespace<import('./src/index').Dialogues>;
 		CHAT_ROOM: DurableObjectNamespace<import('./src/index').ChatRoom>;
-		CHAT_WORKFLOW: Workflow<import('./src/services/conversational/conversational').ChatParams>;
+		CHAT_WORKFLOW: Workflow<import('./src/ai/conversational/conversational').ChatParams>;
+		SEARCH_WORKFLOW: Workflow<import('./src/ai/rag/search').Params>;
+		INGEST_WORKFLOW: Workflow<import('./src/ai/rag/ingest').Params>;
+		VECTORIZE: Vectorize;
 	}
 }
 interface Env extends Cloudflare.Env {}

@@ -25,6 +25,13 @@
 			},
 		],
 	},
+	"workflows": [
+		{
+			"name": "chat",
+			"binding": "CHAT_WORKFLOW",
+			"class_name": "ChatWorkflow",
+		},
+	],
 	"observability": {
 		"enabled": true,
 	},

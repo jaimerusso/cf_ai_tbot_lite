@@ -68,6 +68,7 @@ export const truth_instructions = (messages: RoleScopedChatInput[]): RoleScopedC
         Use it to answer my last question directly, in the same language I used.
         Do not say you cannot determine anything. Do not question or add to the tool result.
         Apply it naturally to what I asked. Plain text only, no markdown.`,
+		name: 'truth_instructions',
 	},
 ];
 

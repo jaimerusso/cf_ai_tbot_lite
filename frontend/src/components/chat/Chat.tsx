@@ -9,6 +9,7 @@ import type { Dialogue } from "../../screens/DialogueScreen";
 export type Message = {
 	role: string;
 	content: string;
+	name?: string;
 };
 
 export default function Chat({

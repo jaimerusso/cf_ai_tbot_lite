@@ -29,7 +29,9 @@ export default function Messages({
 		>
 			{messages
 				.filter(
-					(msg) => msg.role === "user" || msg.role === "assistant"
+					(msg) =>
+						(msg.role === "user" || msg.role === "assistant") &&
+						!msg.name
 				)
 				.map((msg, index) => (
 					<div

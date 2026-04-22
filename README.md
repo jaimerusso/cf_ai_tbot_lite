@@ -49,5 +49,5 @@ In this project, AI was used as a development "co-pilot" specifically for:
 - **Styling:** Tailwind CSS v4
 - **Infrastructure:** Cloudflare Pages
 - **Backend:** Cloudflare Workers
-- **LLM:** Llama 3.3 (llama-3.3-70b-instruct-fp8-fast)
-- **Embedding:** BAAI General Embedding (bge-base-en-v1.5)
+- **LLM:** Llama 3.3 (llama-3.3-70b-instruct-fp8-fast) - Meta
+- **Embedding:** BAAI General Embedding (bge-base-en-v1.5) - BAAI

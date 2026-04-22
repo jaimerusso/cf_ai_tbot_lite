@@ -1,4 +1,4 @@
-# PROMPTS.md
+# PROMPTS.md (WILL SUFFER UPDATES IN THE NEAR FUTURE)
 
 This document records the AI-assisted development process for the **tbot lite** project, as required by the Cloudflare AI app assignment. All interactions documented below were performed using **Claude 4.6 Sonnet**.
 

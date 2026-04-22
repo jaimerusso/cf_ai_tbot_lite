@@ -4,6 +4,7 @@ import { chat_instructions } from './ai/conversational/instructions';
 import type { Dialogue, ChatParams } from './ai/conversational/conversational';
 export { ChatWorkflow } from './ai/conversational/conversational';
 export { SearchWorkflow } from './ai/rag/search';
+export { IngestWorkflow } from './ai/rag/ingest';
 
 const chatRoomDOName = 'chat';
 const dialoguesDOName = 'dialogues';

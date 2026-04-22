@@ -24,7 +24,7 @@ This "lite" version implements a robust **RAG (Retrieval-Augmented Generation)**
 
 ## 🛠️ Development & Authorship
 
-This project is a full-stack implementation built during my Software Engineer Internship application.
+This project is a full-stack implementation built for Cloudflare Software Engineer Internship (Summer 2026) application.
 
 - **Backend:** Developed following official [**Cloudflare Workers (Durable Objects) documentation**](https://developers.cloudflare.com/durable-objects/), ensuring the project adheres to the platform's best practices and architectural standards.
 - **Frontend:** Built with **React**, leveraging experience from my academic thesis (**tbot**) over the past year. Part of the UI code was inspired by and adapted from my original thesis work.
@@ -49,4 +49,5 @@ In this project, AI was used as a development "co-pilot" specifically for:
 - **Styling:** Tailwind CSS v4
 - **Infrastructure:** Cloudflare Pages
 - **Backend:** Cloudflare Workers
-- **LLM:** Llama 3.3 (lama-3.3-70b-instruct-fp8-fast)
+- **LLM:** Llama 3.3 (llama-3.3-70b-instruct-fp8-fast)
+- **Embedding:** BAAI General Embedding (bge-base-en-v1.5)

@@ -1,13 +1,14 @@
 //Return the output of a workflow once it's complete, or throw an error if it fails
-export async function pollWorkflow<K extends string>(instance: any, fields?: K[]): Promise<Record<K, string> | string> {
+export async function pollWorkflow<T>(instance: any): Promise<T>;
+export async function pollWorkflow<T, K extends keyof T>(instance: any, fields: K[]): Promise<Pick<T, K>>;
+export async function pollWorkflow<T, K extends keyof T>(instance: any, fields?: K[]): Promise<T | Pick<T, K>> {
 	while (true) {
 		const status = await instance.status();
 		if (status.status === 'complete') {
-			const output = status.output as Record<K, string>;
+			const output = status.output as T;
 
-			//If only one field is expected from the workflow
 			if (!fields || fields.length === 0) {
-				return output as unknown as string;
+				return output;
 			}
 
 			return fields.reduce(
@@ -15,7 +16,7 @@ export async function pollWorkflow<K extends string>(instance: any, fields?: K[]
 					acc[field] = output[field];
 					return acc;
 				},
-				{} as Record<K, string>,
+				{} as Pick<T, K>,
 			);
 		} else if (status.status === 'errored') {
 			throw new Error('Workflow failed');

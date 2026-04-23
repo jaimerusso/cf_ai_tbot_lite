@@ -7,6 +7,7 @@ declare namespace Cloudflare {
 		durableNamespaces: 'MyDurableObject';
 	}
 	interface Env {
+		[x: string]: any;
 		AI: Ai;
 		DIALOGUES: DurableObjectNamespace<import('./src/durable-objects/dialoguesDO').Dialogues>;
 		CHAT_ROOM: DurableObjectNamespace<import('./src/durable-objects/chatRoomDO').ChatRoom>;
@@ -14,6 +15,7 @@ declare namespace Cloudflare {
 		CHAT_WORKFLOW: Workflow<import('./src/ai/conversational/conversational').ChatParams>;
 		SEARCH_WORKFLOW: Workflow<import('./src/ai/rag/search').Params>;
 		INGEST_WORKFLOW: Workflow<import('./src/ai/rag/ingest').Params>;
+		DELETE_DOCUMENT_WORKFLOW: Workflow<import('./src/ai/rag/deleteDocument').Params>;
 		VECTORIZE: Vectorize;
 	}
 }

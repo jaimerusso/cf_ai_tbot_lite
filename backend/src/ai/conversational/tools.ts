@@ -35,7 +35,7 @@ export const searchDocuments = async (args: { query: string }): Promise<string> 
 		params: { query },
 	});
 
-	const result = (await pollWorkflow(instance)) as string;
+	const result = await pollWorkflow<string>(instance);
 
 	console.log('Tool result:', result, '\n');
 	return result;

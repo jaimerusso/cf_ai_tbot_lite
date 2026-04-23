@@ -1,6 +1,6 @@
 import { DurableObject } from 'cloudflare:workers';
 
-const mapDOName = 'map';
+export const mapDOName = 'map';
 
 type Mapping = {
 	ids: string[];
@@ -17,12 +17,18 @@ export class Map extends DurableObject<Env> {
 		await this.ctx.storage.put(documentId, { ids, resumee });
 	}
 
-	async getMapping(documentId: string): Promise<Mapping | null> {
+	async getMappingIds(documentId: string): Promise<string[]> {
 		const entry = await this.ctx.storage.get<Mapping>(documentId);
-		return entry || null;
+		return entry ? entry.ids : [];
 	}
 
 	async deleteMapping(documentId: string): Promise<void> {
 		await this.ctx.storage.delete(documentId);
+		//await this.ctx.storage.deleteAll();
+	}
+
+	async getDocumentsIDs(): Promise<string[]> {
+		const entries = await this.ctx.storage.list();
+		return [...entries.keys()];
 	}
 }

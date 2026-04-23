@@ -39,7 +39,9 @@ export class ChatRoom extends DurableObject {
 				params,
 			});
 
-			const result = await pollWorkflow(instance, ['finalResponse', 'title']);
+			type WorkflowOutput = { finalResponse: string; title: string };
+
+			const result = await pollWorkflow<WorkflowOutput, keyof WorkflowOutput>(instance, ['finalResponse', 'title']);
 
 			//Send the response back to the client and the title if it exists
 			result.title

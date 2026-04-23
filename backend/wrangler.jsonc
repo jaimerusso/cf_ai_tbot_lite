@@ -45,6 +45,11 @@
 			"binding": "INGEST_WORKFLOW",
 			"class_name": "IngestWorkflow",
 		},
+		{
+			"name": "deleteDocument",
+			"binding": "DELETE_DOCUMENT_WORKFLOW",
+			"class_name": "DeleteDocumentWorkflow",
+		},
 	],
 	"observability": {
 		"enabled": true,

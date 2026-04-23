@@ -1,12 +1,14 @@
 export { ChatWorkflow } from './ai/conversational/conversational';
 export { SearchWorkflow } from './ai/rag/search';
 export { IngestWorkflow } from './ai/rag/ingest';
+export { DeleteDocumentWorkflow } from './ai/rag/deleteDocument';
 export { ChatRoom } from './durable-objects/chatRoomDO';
 export { Dialogues } from './durable-objects/dialoguesDO';
 export { Map } from './durable-objects/mapDO';
 
 import { dialoguesDOName } from './durable-objects/dialoguesDO';
 import { chatRoomDOName } from './durable-objects/chatRoomDO';
+import { mapDOName } from './durable-objects/mapDO';
 
 import { addDocument, deleteDocument } from './ai/rag/knowledge';
 
@@ -42,6 +44,10 @@ async function handleRequest(request: Request, env: Env, ctx: ExecutionContext):
 			return new Response('Empty body', { status: 400 });
 		}
 		return Response.json({ documentName: await addDocument(await body) });
+	}
+	if (knowledgeMatch && request.method === 'GET') {
+		const mapStub = env.MAP.getByName(mapDOName);
+		return Response.json({ documentIds: await mapStub.getDocumentsIDs() });
 	}
 
 	const knowledgeParamsPattern = new URLPattern({ pathname: '/knowledge/:id' });

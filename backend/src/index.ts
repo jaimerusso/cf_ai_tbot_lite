@@ -60,11 +60,6 @@ async function handleRequest(request: Request, env: Env, ctx: ExecutionContext):
 }
 
 export default {
-	/**
-	 * This handler routes to:
-	 * -ChatRoom Durable Object for chat interactions via WebSockets
-	 * -Dialogues Durable Object for storing/retrieving messages and dialogues.
-	 */
 	async fetch(request, env, ctx): Promise<Response> {
 		const response = await handleRequest(request, env, ctx);
 

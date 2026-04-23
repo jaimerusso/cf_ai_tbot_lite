@@ -1,4 +1,5 @@
 import { env } from 'cloudflare:workers';
+import { pollWorkflow } from '../../common/workflow';
 
 //TODO: Put this tools const into a function to get the updated description with a resume of the content in the documents
 export const tools = [
@@ -34,17 +35,8 @@ export const searchDocuments = async (args: { query: string }): Promise<string> 
 		params: { query },
 	});
 
-	let result;
-	while (true) {
-		const status = await instance.status();
-		if (status.status === 'complete') {
-			result = status.output as string;
-			break;
-		} else if (status.status === 'errored') {
-			throw new Error('Workflow failed');
-		}
-		await new Promise((r) => setTimeout(r, 500)); //Wait for 500ms before checking the status again
-	}
+	const result = (await pollWorkflow(instance)) as string;
+
 	console.log('Tool result:', result, '\n');
 	return result;
 };

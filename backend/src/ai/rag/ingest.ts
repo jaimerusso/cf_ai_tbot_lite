@@ -4,12 +4,12 @@ import type { WorkflowEvent } from 'cloudflare:workers';
 export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
 		console.log('\n\nStarting Ingest Workflow...');
-		const { text } = event.payload;
+		const { document } = event.payload;
 
 		//Step 1: Generate vector embedding for the text
 		const embedding = await step.do(`generate-embedding`, async () => {
 			const result = (await env.AI.run('@cf/baai/bge-base-en-v1.5', {
-				text,
+				text: document,
 			})) as any;
 			const values = result.data?.[0] as number[];
 			if (!values) throw new Error('Failed to generate vector embedding');
@@ -24,7 +24,7 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 				{
 					id,
 					values: embedding,
-					metadata: { text },
+					metadata: { document },
 				},
 			]);
 			return id;

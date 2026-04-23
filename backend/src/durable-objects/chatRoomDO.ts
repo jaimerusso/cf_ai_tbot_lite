@@ -1,6 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import type { ChatParams } from '../ai/conversational/conversational';
 import { dialoguesDOName } from './dialoguesDO';
+import { pollWorkflow } from '../common/workflow';
 
 export const chatRoomDOName = 'chat';
 
@@ -38,23 +39,12 @@ export class ChatRoom extends DurableObject {
 				params,
 			});
 
-			//Wait for "complete" status and get the result
-			let response: string = '';
-			let title: string = '';
-			while (true) {
-				const status = await instance.status();
-				if (status.status === 'complete') {
-					const output = status.output as { finalResponse: string; title: string };
-					response = output.finalResponse;
-					title = output.title;
-					break;
-				} else if (status.status === 'errored') {
-					throw new Error('Workflow failed');
-				}
-				await new Promise((r) => setTimeout(r, 500)); //Wait for 500ms before checking the status again
-			}
+			const result = await pollWorkflow(instance, ['finalResponse', 'title']);
+
 			//Send the response back to the client and the title if it exists
-			title ? ws.send(JSON.stringify({ title, response })) : ws.send(JSON.stringify({ response }));
+			result.title
+				? ws.send(JSON.stringify({ title: result.title, response: result.finalResponse }))
+				: ws.send(JSON.stringify({ response: result.finalResponse }));
 		} else {
 			ws.send('Invalid message type. Message must be a string!');
 		}

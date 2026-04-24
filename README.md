@@ -1,5 +1,7 @@
 # 🏗️ PROJECT UNDER DEVELOPMENT 🏗️
+
 # THIS README WILL SUFFER UPDATES IN THE NEAR FUTURE
+
 ![CFxtbot](https://github.com/jaimerusso/cf_ai_tbot_lite/blob/main/frontend/src/assets/CFxtbot.png?raw=true)
 
 ---

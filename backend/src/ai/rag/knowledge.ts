@@ -2,15 +2,23 @@ import { env } from 'cloudflare:workers';
 import { documentsDOName } from '../../durable-objects/documentsDO';
 
 export async function addDocument(documents: File[]) {
+	const documentStub = env.DOCUMENTS.getByName(documentsDOName);
+	const errors: string[] = [];
 	//Process each document in parallel
 	await Promise.all(
 		documents.map(async (document) => {
-			env.INGEST_WORKFLOW.create({
-				params: { name: document.name, content: await document.text() },
-			});
+			const name = document.name;
+			const entry = await documentStub.getDocument(name);
+			if (entry && entry.name === name) {
+				errors.push(name);
+			} else {
+				env.INGEST_WORKFLOW.create({
+					params: { name: document.name, content: await document.text() },
+				});
+			}
 		}),
 	);
-	return;
+	return { duplicates: errors };
 }
 
 export async function deleteDocument(name: string) {

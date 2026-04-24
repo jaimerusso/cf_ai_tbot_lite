@@ -51,10 +51,12 @@ app.delete('/dialogues/:id', (c) => {
 app.post('/knowledge', async (c) => {
 	const formData = await c.req.formData();
 	const files = formData.getAll('files') as File[];
-	await addDocument(files);
-	return c.json({ message: 'Documents added successfully' });
-});
+	const { duplicates } = await addDocument(files);
 
+	return duplicates.length === 0
+		? c.json({ message: 'Documents added successfully' })
+		: c.json({ message: 'Some documents were not added as they already exist', duplicates });
+});
 app.get('/knowledge', async (c) => {
 	const documentsStub = c.env.DOCUMENTS.getByName(documentsDOName);
 	return c.json({ documents: await documentsStub.getDocuments() });
@@ -70,7 +72,7 @@ app.delete('/knowledge/:name', async (c) => {
 	}
 });
 
-// Admin endpoints for testing
+// Hard delete endpoints (for testing purposes only)
 app.delete('/vectors', async (c) => {
 	const { ids } = await c.req.json<{ ids: string[] }>();
 	await c.env.VECTORIZE.deleteByIds(ids);
@@ -81,6 +83,7 @@ app.delete('/documents/all', async (c) => {
 	await documentsStub.deleteAll();
 	return c.json({ success: true });
 });
+/*-------------------------------------------------*/
 
 // WebSocket
 app.get('/ws', (c) => {

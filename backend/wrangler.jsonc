@@ -9,8 +9,8 @@
 	"compatibility_date": "2026-04-14",
 	"migrations": [
 		{
-			"new_sqlite_classes": ["ChatRoom", "Dialogues", "Documents"],
-			"tag": "v4",
+			"new_sqlite_classes": ["ChatRoom", "Dialogues", "Documents", "ToolDescriptions"],
+			"tag": "v5",
 		},
 	],
 	"durable_objects": {
@@ -26,6 +26,10 @@
 			{
 				"class_name": "Documents",
 				"name": "DOCUMENTS",
+			},
+			{
+				"class_name": "ToolDescriptions",
+				"name": "TOOL_DESCRIPTIONS",
 			},
 		],
 	},

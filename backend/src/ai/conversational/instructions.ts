@@ -56,10 +56,40 @@ export const intent_instructions = (messages: RoleScopedChatInput[]): RoleScoped
 	{ role: 'user', content: JSON.stringify(messages) },
 ];
 
-export const resumee_instructions = (prompt: string): RoleScopedChatInput[] => [
+export const title_instructions = (prompt: string): RoleScopedChatInput[] => [
 	{
 		role: 'system',
 		content: `Summarize the following user prompt into a short title (max 5 words): ${prompt}. \
 			JUST return the title`,
+	},
+];
+
+export const resumee_instructions = (content: string): RoleScopedChatInput[] => [
+	{
+		role: 'system',
+		content: `You are a document summarization assistant. Summarize the given document in plain flowing text, 2-3 sentences maximum. No bullet points, no headers, no structured format. Just a concise paragraph. Respond in the same language as the document.`,
+	},
+	{
+		role: 'user',
+		content: `Summarize this document:\n\n${content}`,
+	},
+];
+
+export const search_documents_instructions = (currentDescription: string, newSummary: string): RoleScopedChatInput[] => [
+	{
+		role: 'system',
+		content: `You are a tool description assistant. You will receive an existing tool description and a new document summary. Your task is to merge them into a single updated description that reflects all the documents the tool can answer questions about.
+
+		RULES:
+		- Keep the description concise, 3-5 sentences maximum
+		- Write in plain flowing text, no bullet points or headers
+		- The description should explain what topics and questions the tool can answer
+		- Preserve relevant information from the existing description
+		- Integrate the new summary naturally
+		- Respond in English`,
+	},
+	{
+		role: 'user',
+		content: `Existing description:\n${currentDescription}\n\nNew document summary to integrate:\n${newSummary}`,
 	},
 ];

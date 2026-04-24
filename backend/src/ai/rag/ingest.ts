@@ -1,6 +1,8 @@
 import { env, WorkflowEntrypoint, WorkflowStep } from 'cloudflare:workers';
 import type { WorkflowEvent } from 'cloudflare:workers';
 import { documentsDOName } from '../../durable-objects/documentsDO';
+import { resumee_instructions, search_documents_instructions } from '../conversational/instructions';
+import { toolDescriptionsDOName } from '../../durable-objects/toolDescriptionsDO';
 
 export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
@@ -46,11 +48,23 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 		//Generate resumee inputting the document in a model
 		console.log(name, ' - Step 4: Generate document resumee');
 		const resumee = await step.do(`generate-resumee`, async () => {
-			return 'resumee test';
+			const messages = resumee_instructions(content as string);
+			const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
+			return response.response;
 		});
 
-		//Step 5: Update in the mapping
-		console.log(name, ' - Step 5: Await vector insertion and then update the entry in the DO');
+		//Step 5: Generate new search documents tool description
+		console.log(name, ' - Step 5: Generate new search documents tool description');
+		await step.do(`update-tool-description`, async () => {
+			const toolDescriptionsStub = env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
+			const currentDescription = (await toolDescriptionsStub.getToolDescription()) ?? '';
+			const messages = search_documents_instructions(currentDescription, resumee);
+			const newDescription = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
+			toolDescriptionsStub.updateToolDescription(newDescription.response);
+		});
+
+		//Step 6: Update in the mapping
+		console.log(name, ' - Step 6: Await vector insertion and then update the entry in the DO');
 		await step.do(`update-entry`, async () => {
 			while (true) {
 				const results = await env.VECTORIZE.getByIds(ids);

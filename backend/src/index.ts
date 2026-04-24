@@ -5,6 +5,7 @@ export { DeleteDocumentWorkflow } from './ai/rag/deleteDocument';
 export { ChatRoom } from './durable-objects/chatRoomDO';
 export { Dialogues } from './durable-objects/dialoguesDO';
 export { Documents } from './durable-objects/documentsDO';
+export { ToolDescriptions } from './durable-objects/toolDescriptionsDO';
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -14,6 +15,7 @@ import { chatRoomDOName } from './durable-objects/chatRoomDO';
 import { documentsDOName } from './durable-objects/documentsDO';
 
 import { addDocument, deleteDocument } from './ai/rag/knowledge';
+import { toolDescriptionsDOName } from './durable-objects/toolDescriptionsDO';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -72,7 +74,7 @@ app.delete('/knowledge/:name', async (c) => {
 	}
 });
 
-// Hard delete endpoints (for testing purposes only)
+// Testing endpoints
 app.delete('/vectors', async (c) => {
 	const { ids } = await c.req.json<{ ids: string[] }>();
 	await c.env.VECTORIZE.deleteByIds(ids);
@@ -82,6 +84,11 @@ app.delete('/documents/all', async (c) => {
 	const documentsStub = c.env.DOCUMENTS.getByName(documentsDOName);
 	await documentsStub.deleteAll();
 	return c.json({ success: true });
+});
+app.get('/tool-description', async (c) => {
+	const toolDescriptionsStub = c.env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
+	const description = await toolDescriptionsStub.getToolDescription();
+	return c.json({ description });
 });
 /*-------------------------------------------------*/
 

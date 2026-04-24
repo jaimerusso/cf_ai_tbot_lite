@@ -1,4 +1,4 @@
-import { intent_instructions, resumee_instructions, truth_instructions } from './instructions';
+import { intent_instructions, title_instructions, truth_instructions } from './instructions';
 import { tools, searchDocuments } from './tools';
 import { env, WorkflowEntrypoint, WorkflowStep } from 'cloudflare:workers';
 import type { WorkflowEvent } from 'cloudflare:workers';
@@ -88,8 +88,8 @@ function appendMessage(messages: RoleScopedChatInput[], role: string, content: s
 }
 
 //Generate a title for the dialogue from the first user prompt
-export async function generateResumee(prompt: string): Promise<string> {
-	const instructions = resumee_instructions(prompt);
+export async function generateTitle(prompt: string): Promise<string> {
+	const instructions = title_instructions(prompt);
 
 	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages: instructions })) as { response: string };
 	return response.response;
@@ -98,7 +98,10 @@ export async function generateResumee(prompt: string): Promise<string> {
 //Get the intent of the user and return the tool to call (or fallback - generic) and the arguments to call it (or the original prompt)
 async function getIntent(messages: RoleScopedChatInput[]): Promise<[string, string]> {
 	const instructions = intent_instructions(messages);
-	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages: instructions, tools })) as any;
+	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+		messages: instructions,
+		tools: await tools(),
+	})) as any;
 
 	const toolCalls = response.tool_calls;
 

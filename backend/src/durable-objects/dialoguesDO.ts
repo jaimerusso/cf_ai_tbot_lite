@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import { generateResumee } from '../ai/conversational/conversational';
+import { generateTitle } from '../ai/conversational/conversational';
 import { chat_instructions } from '../ai/conversational/instructions';
 
 export type Dialogue = {
@@ -62,7 +62,7 @@ export class Dialogues extends DurableObject<Env> {
 		if (entry.title === 'New chat') {
 			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1)?.content;
 			if (typeof lastUserMessage === 'string') {
-				entry.title = await generateResumee(lastUserMessage);
+				entry.title = await generateTitle(lastUserMessage);
 			}
 			titleChanged = true;
 		}

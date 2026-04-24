@@ -1,7 +1,7 @@
-import { act, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Input from "./Input";
 import logo from "../../assets/CFxtbot.png";
-import axios, { formToJSON } from "axios";
+import axios from "axios";
 import Messages from "./Messages";
 import Header from "./Header";
 import type { Dialogue } from "../../screens/DialogueScreen";
@@ -19,6 +19,7 @@ export default function Chat({
 	setDialogues,
 	newDialogue,
 	dialogueTitle,
+	setDialogueTitle,
 }: {
 	httpUrl: string;
 	wsUrl: string;
@@ -26,14 +27,25 @@ export default function Chat({
 	setDialogues: React.Dispatch<React.SetStateAction<Dialogue[]>>;
 	newDialogue: () => Promise<string>;
 	dialogueTitle: string;
+	setDialogueTitle: React.Dispatch<React.SetStateAction<string>>;
 }) {
 	const [waitingResponse, setWaitingResponse] = useState(false); //State to track if waiting for response from server (loading state)
-	const [messages, setMessages] = useState<Message[]>([]); //Dialogue messages
-	const [title, setTitle] = useState("");
+	const [messages, setMessages] = useState<Message[]>([]); //Current dialogue messages
 	const ws = useRef<WebSocket | null>(null);
 	const activeDialIDRef = useRef(activeDialID);
 	const waitingResponseRef = useRef(false);
 	const isNewDialogue = useRef(false);
+
+	const sendMessageRequest = async (
+		prompt: string,
+		dialogueId: string,
+		socket: WebSocket
+	) => {
+		setMessages((prev) => [...prev, { role: "user", content: prompt }]);
+		setWaitingResponse(true);
+		waitingResponseRef.current = true;
+		socket.send(JSON.stringify({ dialogueId, prompt }));
+	};
 
 	const sendMessage = async (prompt: string) => {
 		let dialogueId = activeDialID;
@@ -43,12 +55,17 @@ export default function Chat({
 			dialogueId = await newDialogue();
 		}
 
-		const socket = ws.current;
+		let socket = ws.current;
 		if (socket && socket.readyState === WebSocket.OPEN && dialogueId) {
-			setMessages((prev) => [...prev, { role: "user", content: prompt }]);
-			setWaitingResponse(true);
-			waitingResponseRef.current = true;
-			socket.send(JSON.stringify({ dialogueId, prompt }));
+			sendMessageRequest(prompt, dialogueId, socket);
+		} else {
+			//Reopen Websocket and retry sending message
+			socket = new WebSocket(wsUrl);
+			ws.current = socket;
+			socket.onopen = () => {
+				console.log("WebSocket opened");
+			};
+			sendMessageRequest(prompt, dialogueId, socket);
 		}
 	};
 
@@ -68,7 +85,6 @@ export default function Chat({
 
 			//If waiting, append to messages
 			if (waitingResponseRef.current) {
-				console.log("entered here!");
 				//Update waiting response state
 				setWaitingResponse(false);
 				waitingResponseRef.current = false;
@@ -81,7 +97,7 @@ export default function Chat({
 					},
 				]);
 				if (title) {
-					setTitle(title);
+					setDialogueTitle(title);
 					setDialogues((prev) =>
 						prev.map((d) =>
 							d.id === activeDialIDRef.current
@@ -116,7 +132,7 @@ export default function Chat({
 			const resDialogue = res.data.dialogue;
 			if (resDialogue) {
 				setMessages(resDialogue.messages);
-				setTitle(resDialogue.title);
+				setDialogueTitle(resDialogue.title);
 			}
 		});
 	};
@@ -133,13 +149,8 @@ export default function Chat({
 			waitingResponseRef.current = false;
 		} else {
 			setMessages([]);
-			setTitle("");
 		}
 	}, [activeDialID]);
-
-	useEffect(() => {
-		setTitle(dialogueTitle);
-	}, [dialogueTitle]);
 
 	return (
 		<div className="flex flex-col flex-1 h-full bg-black relative">
@@ -148,7 +159,7 @@ export default function Chat({
 					<img src={logo} className="w-xl opacity-50"></img>
 				</div>
 			</div>
-			<Header title={title} />
+			<Header title={dialogueTitle} />
 			<Messages messages={messages} waitingResponse={waitingResponse} />
 			<Input
 				sendMessage={sendMessage}

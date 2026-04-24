@@ -6,88 +6,71 @@ export { ChatRoom } from './durable-objects/chatRoomDO';
 export { Dialogues } from './durable-objects/dialoguesDO';
 export { Map } from './durable-objects/mapDO';
 
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+
 import { dialoguesDOName } from './durable-objects/dialoguesDO';
 import { chatRoomDOName } from './durable-objects/chatRoomDO';
 import { mapDOName } from './durable-objects/mapDO';
 
 import { addDocument, deleteDocument } from './ai/rag/knowledge';
 
-async function handleRequest(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-	const url = new URL(request.url);
-	const dialoguesStub = env.DIALOGUES.getByName(dialoguesDOName);
+const app = new Hono<{ Bindings: Env }>();
 
-	const dialoguesPattern = new URLPattern({ pathname: '/dialogues' });
-	const dialoguesMatch = dialoguesPattern.exec(url);
-	if (dialoguesMatch && request.method === 'GET') {
-		return dialoguesStub.getDialogueIds();
+app.use(
+	'*',
+	cors({
+		origin: '*',
+		allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		allowHeaders: ['*'],
+	}),
+);
+
+// Dialogues
+app.get('/dialogues', (c) => {
+	const dialoguesStub = c.env.DIALOGUES.getByName(dialoguesDOName);
+	return dialoguesStub.getDialogueIds();
+});
+
+app.post('/dialogues', (c) => {
+	const dialoguesStub = c.env.DIALOGUES.getByName(dialoguesDOName);
+	return dialoguesStub.newDialogue();
+});
+
+app.get('/dialogues/:id', (c) => {
+	const dialoguesStub = c.env.DIALOGUES.getByName(dialoguesDOName);
+	return dialoguesStub.getDialogue(c.req.param('id'));
+});
+
+app.delete('/dialogues/:id', (c) => {
+	const dialoguesStub = c.env.DIALOGUES.getByName(dialoguesDOName);
+	return dialoguesStub.deleteDialogue(c.req.param('id'));
+});
+
+// Knowledge
+app.post('/knowledge', async (c) => {
+	const body = await c.req.text();
+	if (!body) return c.json({ error: 'Empty body' }, 400);
+	return c.json({ documentName: await addDocument(body) });
+});
+
+app.get('/knowledge', async (c) => {
+	const mapStub = c.env.MAP.getByName(mapDOName);
+	return c.json({ documentIds: await mapStub.getDocumentsIDs() });
+});
+
+app.delete('/knowledge/:id', async (c) => {
+	const documentId = c.req.param('id');
+	return c.json({ documentId: await deleteDocument(documentId) });
+});
+
+// WebSocket
+app.get('/ws', (c) => {
+	if (c.req.header('Upgrade') !== 'websocket') {
+		return c.json({ error: 'Expected WebSocket' }, 426);
 	}
-	if (dialoguesMatch && request.method === 'POST') {
-		return dialoguesStub.newDialogue();
-	}
+	const chatStub = c.env.CHAT_ROOM.getByName(chatRoomDOName);
+	return chatStub.fetch(c.req.raw);
+});
 
-	const dialogueParamsPattern = new URLPattern({ pathname: '/dialogues/:id' });
-	const dialogueParamsMatch = dialogueParamsPattern.exec(url);
-	if (dialogueParamsMatch && request.method === 'GET') {
-		const dialogueId = dialogueParamsMatch.pathname.groups.id;
-		return dialoguesStub.getDialogue(dialogueId);
-	}
-	if (dialogueParamsMatch && request.method === 'DELETE') {
-		const dialogueId = dialogueParamsMatch.pathname.groups.id;
-		return dialoguesStub.deleteDialogue(dialogueId);
-	}
-
-	const knowledgePattern = new URLPattern({ pathname: '/knowledge' });
-	const knowledgeMatch = knowledgePattern.exec(url);
-	if (knowledgeMatch && request.method === 'POST') {
-		const body = await request.text();
-		if (!body) {
-			return new Response('Empty body', { status: 400 });
-		}
-		return Response.json({ documentName: await addDocument(await body) });
-	}
-	if (knowledgeMatch && request.method === 'GET') {
-		const mapStub = env.MAP.getByName(mapDOName);
-		return Response.json({ documentIds: await mapStub.getDocumentsIDs() });
-	}
-
-	const knowledgeParamsPattern = new URLPattern({ pathname: '/knowledge/:id' });
-	const knowledgeParamsMatch = knowledgeParamsPattern.exec(url);
-	if (knowledgeParamsMatch && request.method === 'DELETE') {
-		const documentId = knowledgeParamsMatch.pathname.groups.id;
-		return Response.json({ documentId: await deleteDocument(documentId) });
-	}
-
-	if (request.headers.get('Upgrade') === 'websocket') {
-		const chatStub = env.CHAT_ROOM.getByName(chatRoomDOName);
-		return chatStub.fetch(request);
-	}
-
-	return new Response('Not found', { status: 404 });
-}
-
-export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		const response = await handleRequest(request, env, ctx);
-
-		if (request.headers.get('Upgrade') === 'websocket') {
-			return response;
-		}
-
-		const corsHeaders = {
-			'Access-Control-Allow-Origin': '*',
-			'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-			'Access-Control-Allow-Headers': '*',
-		};
-
-		if (request.method === 'OPTIONS') {
-			return new Response(null, { headers: corsHeaders });
-		}
-
-		//Put all corsHeaders as headers for the response
-		const newResponse = new Response(response.body, response);
-		Object.entries(corsHeaders).forEach(([key, value]) => {
-			newResponse.headers.set(key, value);
-		});
-		return newResponse;
-	},
-} satisfies ExportedHandler<Env>;
+export default app;

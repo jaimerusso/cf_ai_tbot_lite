@@ -9,8 +9,6 @@ export const chatRoomDOName = 'chat';
 export class ChatRoom extends DurableObject {
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
-		// Auto ping/pong without waking the object
-		this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'));
 	}
 
 	async fetch(request: Request): Promise<Response> {
@@ -27,34 +25,33 @@ export class ChatRoom extends DurableObject {
 	async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
 		console.log(message);
 		if (typeof message === 'string') {
-			const { dialogueId, prompt } = JSON.parse(message);
+			try {
+				const { dialogueId, prompt } = JSON.parse(message);
 
-			const params: ChatParams = {
-				dialogueId: dialogueId,
-				prompt: prompt,
-				dialoguesDOName: dialoguesDOName,
-			};
+				const params: ChatParams = {
+					dialogueId: dialogueId,
+					prompt: prompt,
+					dialoguesDOName: dialoguesDOName,
+				};
 
-			const instance = await this.env.CHAT_WORKFLOW.create({
-				params,
-			});
+				const instance = await this.env.CHAT_WORKFLOW.create({
+					params,
+				});
 
-			type WorkflowOutput = { finalResponse: string; title: string };
+				type WorkflowOutput = { finalResponse: string; title: string };
 
-			const result = await pollWorkflow<WorkflowOutput, keyof WorkflowOutput>(instance, ['finalResponse', 'title']);
+				const result = await pollWorkflow<WorkflowOutput, keyof WorkflowOutput>(instance, ['finalResponse', 'title']);
 
-			//Send the response back to the client and the title if it exists
-			result.title
-				? ws.send(JSON.stringify({ title: result.title, response: result.finalResponse }))
-				: ws.send(JSON.stringify({ response: result.finalResponse }));
+				//Send the response back to the client and the title if it exists
+				result.title
+					? ws.send(JSON.stringify({ title: result.title, response: result.finalResponse }))
+					: ws.send(JSON.stringify({ response: result.finalResponse }));
+			} catch (error) {
+				console.error('WebSocket error:', error);
+				ws.send(JSON.stringify({ error: 'Something went wrong' }));
+			}
 		} else {
 			ws.send('Invalid message type. Message must be a string!');
 		}
-	}
-
-	async webSocketClose(ws: WebSocket, code: number, reason: string, wasClean: boolean) {
-		// With web_socket_auto_reply_to_close (compat date >= 2026-04-07), the runtime
-		// auto-replies to Close frames. Calling close() is safe but no longer required.
-		ws.close(code, reason);
 	}
 }

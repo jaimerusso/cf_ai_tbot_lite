@@ -13,7 +13,7 @@ function App() {
 	const IP = import.meta.env.VITE_API_IP;
 	const isSecure = window.location.protocol === "https:";
 	const httpUrl = `${isSecure ? "https" : "http"}://${IP}`;
-	const wsUrl = `${isSecure ? "wss" : "ws"}://${IP}`;
+	const wsUrl = `${isSecure ? "wss" : "ws"}://${IP}/ws`;
 
 	console.log(IP);
 

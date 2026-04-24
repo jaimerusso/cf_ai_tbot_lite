@@ -20,8 +20,6 @@ export default function Messages({
 		}
 	}, [messages]);
 
-	useEffect(() => {}, [waitingResponse]);
-
 	return (
 		<div
 			className="flex flex-col px-5 pb-10 pt-5 overflow-y-auto relative z-1 flex-1 mb-3"

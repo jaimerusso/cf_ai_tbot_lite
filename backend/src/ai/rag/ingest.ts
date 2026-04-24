@@ -26,7 +26,7 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 				{
 					id,
 					values: embedding,
-					metadata: { document },
+					metadata: { document }, //TODO: change for document content
 				},
 			]);
 			return id;

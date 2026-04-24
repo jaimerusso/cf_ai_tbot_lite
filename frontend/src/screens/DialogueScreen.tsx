@@ -48,9 +48,10 @@ export default function DialogueScreen({
 		return "";
 	};
 
-	//New dialogue selection
-	const newDialoguev2 = () => {
+	//New dialogue selection in the sidebar
+	const newDialogueSelection = () => {
 		setActiveDialID("");
+		setDialogueTitle("New chat");
 	};
 
 	return (
@@ -61,7 +62,7 @@ export default function DialogueScreen({
 				selectDialogue={setActiveDialID}
 				setDialogues={setDialogues}
 				httpUrl={httpUrl}
-				newDialogue={newDialoguev2}
+				newDialogue={newDialogueSelection}
 			/>
 			<Chat
 				httpUrl={httpUrl}
@@ -70,6 +71,7 @@ export default function DialogueScreen({
 				setDialogues={setDialogues}
 				newDialogue={newDialogue}
 				dialogueTitle={dialogueTitle}
+				setDialogueTitle={setDialogueTitle}
 			/>
 		</div>
 	);

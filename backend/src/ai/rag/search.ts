@@ -30,11 +30,11 @@ export class SearchWorkflow extends WorkflowEntrypoint<Env, Params> {
 		const matchStrings = await step.do(`search-vectors`, async () => {
 			return matches.matches.map((match, index) => {
 				console.log(`Match ${index + 1}:`);
-				console.log('ID:', match.metadata?.document);
+				console.log('Metadata:', match.metadata?.document);
 				return match.metadata?.document;
 			});
 		});
 
-		return matches;
+		return matchStrings;
 	}
 }

@@ -73,7 +73,7 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 		});
 
 		//Workflow completed
-		console.log('Workflow completed\nresponse: ', finalResponse, '\ntitle: ', title, '\n\n');
+		console.log('Conversational workflow completed\nresponse: ', finalResponse, '\ntitle: ', title, '\n\n');
 		return { finalResponse, title };
 	}
 }

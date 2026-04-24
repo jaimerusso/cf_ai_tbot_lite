@@ -49,17 +49,17 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 		console.log(name, ' - Step 4: Generate document resumee');
 		const resumee = await step.do(`generate-resumee`, async () => {
 			const messages = resumee_instructions(content as string);
-			const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
+			const response = (await this.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
 			return response.response;
 		});
 
 		//Step 5: Generate new search documents tool description
 		console.log(name, ' - Step 5: Generate new search documents tool description');
 		await step.do(`update-tool-description`, async () => {
-			const toolDescriptionsStub = env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
+			const toolDescriptionsStub = this.env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
 			const currentDescription = (await toolDescriptionsStub.getToolDescription()) ?? '';
 			const messages = search_documents_instructions(currentDescription, resumee);
-			const newDescription = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
+			const newDescription = (await this.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
 			toolDescriptionsStub.updateToolDescription(newDescription.response);
 		});
 
@@ -67,7 +67,7 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 		console.log(name, ' - Step 6: Await vector insertion and then update the entry in the DO');
 		await step.do(`update-entry`, async () => {
 			while (true) {
-				const results = await env.VECTORIZE.getByIds(ids);
+				const results = await this.env.VECTORIZE.getByIds(ids);
 				//If all vectors are inserted
 				if (results.length === ids.length) {
 					break;

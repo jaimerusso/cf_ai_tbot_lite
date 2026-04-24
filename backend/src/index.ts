@@ -15,7 +15,7 @@ import { chatRoomDOName } from './durable-objects/chatRoomDO';
 import { documentsDOName } from './durable-objects/documentsDO';
 
 import { addDocument, deleteDocument } from './ai/rag/knowledge';
-import { toolDescriptionsDOName } from './durable-objects/toolDescriptionsDO';
+import { tools } from './ai/conversational/tools';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -53,11 +53,17 @@ app.delete('/dialogues/:id', (c) => {
 app.post('/knowledge', async (c) => {
 	const formData = await c.req.formData();
 	const files = formData.getAll('files') as File[];
-	const { duplicates } = await addDocument(files);
+	const { alreadyExists, emptyFiles } = await addDocument(files);
 
-	return duplicates.length === 0
-		? c.json({ message: 'Documents added successfully' })
-		: c.json({ message: 'Some documents were not added as they already exist', duplicates });
+	if (alreadyExists.length === 0 && emptyFiles.length === 0) {
+		return c.json({ message: 'Documents added successfully' });
+	}
+
+	return c.json({
+		message: 'Some documents were not added',
+		alreadyExists,
+		emptyFiles,
+	});
 });
 app.get('/knowledge', async (c) => {
 	const documentsStub = c.env.DOCUMENTS.getByName(documentsDOName);
@@ -86,9 +92,7 @@ app.delete('/documents/all', async (c) => {
 	return c.json({ success: true });
 });
 app.get('/tool-description', async (c) => {
-	const toolDescriptionsStub = c.env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
-	const description = await toolDescriptionsStub.getToolDescription();
-	return c.json({ description });
+	return c.json(await tools());
 });
 /*-------------------------------------------------*/
 

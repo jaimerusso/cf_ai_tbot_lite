@@ -3,22 +3,30 @@ import { documentsDOName } from '../../durable-objects/documentsDO';
 
 export async function addDocument(documents: File[]) {
 	const documentStub = env.DOCUMENTS.getByName(documentsDOName);
-	const errors: string[] = [];
+
+	//Define error constants
+	const alreadyExists: string[] = [];
+	const emptyFiles: string[] = [];
 	//Process each document in parallel
 	await Promise.all(
 		documents.map(async (document) => {
 			const name = document.name;
 			const entry = await documentStub.getDocument(name);
 			if (entry && entry.name === name) {
-				errors.push(name);
+				alreadyExists.push(name);
 			} else {
-				env.INGEST_WORKFLOW.create({
-					params: { name: document.name, content: await document.text() },
-				});
+				const content = await document.text();
+				if (content.length === 0) {
+					emptyFiles.push(name);
+				} else {
+					env.INGEST_WORKFLOW.create({
+						params: { name: document.name, content },
+					});
+				}
 			}
 		}),
 	);
-	return { duplicates: errors };
+	return { alreadyExists, emptyFiles };
 }
 
 export async function deleteDocument(name: string) {

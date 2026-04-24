@@ -8,11 +8,13 @@ export class ToolDescriptions extends DurableObject<Env> {
 		super(ctx, env);
 	}
 
-	async newToolDescription(description: string): Promise<void> {
+	async updateToolDescription(description: string): Promise<void> {
+		console.log('Saving new tool description...');
 		await this.ctx.storage.put(toolDescriptionsDOName, description);
 	}
 
-	async getToolDescription(): Promise<string | undefined> {
-		return await this.ctx.storage.get<string>(toolDescriptionsDOName);
+	async getToolDescription(): Promise<String> {
+		const description = await this.ctx.storage.get<string>(toolDescriptionsDOName);
+		return description ?? '';
 	}
 }

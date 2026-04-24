@@ -93,3 +93,22 @@ export const search_documents_instructions = (currentDescription: string, newSum
 		content: `Existing description:\n${currentDescription}\n\nNew document summary to integrate:\n${newSummary}`,
 	},
 ];
+
+//Pre-condition: the current description always have more information from other documents than the summary of the document to remove
+export const remove_search_documents_instructions = (currentDescription: string, summaryToRemove: string): RoleScopedChatInput[] => [
+	{
+		role: 'system',
+		content: `You are a tool description assistant. You will receive an existing tool description and a summary of a document that has been removed.
+
+		RULES:
+		- Remove only the information that comes exclusively from the removed document summary
+		- Preserve all information that comes from other documents
+		- Keep the description concise, 3-5 sentences maximum
+		- Write in plain flowing text, no bullet points or headers
+		- Respond in English`,
+	},
+	{
+		role: 'user',
+		content: `Existing description:\n${currentDescription}\n\nSummary of removed document:\n${summaryToRemove}`,
+	},
+];

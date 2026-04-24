@@ -2,11 +2,11 @@ import { DurableObject } from 'cloudflare:workers';
 
 export const documentsDOName = 'documents';
 
-type Document = {
+export type Document = {
 	name: string;
 	embeddingIds: string[];
 	resumee: string;
-	status: 'processing' | 'ready' | 'error';
+	status: 'processing' | 'deleting' | 'ready';
 	lastUpdated: number;
 };
 
@@ -29,7 +29,7 @@ export class Documents extends DurableObject<Env> {
 	async updateDocument(
 		name: string,
 		updates: Partial<{
-			status: 'processing' | 'deleting' | 'ready' | 'error';
+			status: 'processing' | 'deleting' | 'ready';
 			embeddingIds: string[];
 			resumee: string;
 		}>,
@@ -48,14 +48,8 @@ export class Documents extends DurableObject<Env> {
 		return await this.ctx.storage.get<Document>(name);
 	}
 
-	//async getEmbeddingIds(documentName: string): Promise<string[]> {
-	//	const entry = await this.ctx.storage.get<Document>(documentName);
-	//	return entry ? entry.embeddingIds : [];
-	//}
-
 	async deleteDocument(name: string): Promise<void> {
 		await this.ctx.storage.delete(name);
-		//await this.ctx.storage.deleteAll();
 	}
 
 	async getDocuments(): Promise<Document[]> {

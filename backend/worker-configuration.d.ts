@@ -11,7 +11,7 @@ declare namespace Cloudflare {
 		AI: Ai;
 		DIALOGUES: DurableObjectNamespace<import('./src/durable-objects/dialoguesDO').Dialogues>;
 		CHAT_ROOM: DurableObjectNamespace<import('./src/durable-objects/chatRoomDO').ChatRoom>;
-		MAP: DurableObjectNamespace<import('./src/durable-objects/mapDO').Map>;
+		DOCUMENTS: DurableObjectNamespace<import('./src/durable-objects/documentsDO').Map>;
 		CHAT_WORKFLOW: Workflow<import('./src/ai/conversational/conversational').ChatParams>;
 		SEARCH_WORKFLOW: Workflow<import('./src/ai/rag/search').Params>;
 		INGEST_WORKFLOW: Workflow<import('./src/ai/rag/ingest').Params>;

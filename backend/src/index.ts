@@ -4,14 +4,14 @@ export { IngestWorkflow } from './ai/rag/ingest';
 export { DeleteDocumentWorkflow } from './ai/rag/deleteDocument';
 export { ChatRoom } from './durable-objects/chatRoomDO';
 export { Dialogues } from './durable-objects/dialoguesDO';
-export { Map } from './durable-objects/mapDO';
+export { Documents } from './durable-objects/documentsDO';
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
 import { dialoguesDOName } from './durable-objects/dialoguesDO';
 import { chatRoomDOName } from './durable-objects/chatRoomDO';
-import { mapDOName } from './durable-objects/mapDO';
+import { documentsDOName } from './durable-objects/documentsDO';
 
 import { addDocument, deleteDocument } from './ai/rag/knowledge';
 
@@ -49,19 +49,37 @@ app.delete('/dialogues/:id', (c) => {
 
 // Knowledge
 app.post('/knowledge', async (c) => {
-	const body = await c.req.text();
-	if (!body) return c.json({ error: 'Empty body' }, 400);
-	return c.json({ documentName: await addDocument(body) });
+	const formData = await c.req.formData();
+	const files = formData.getAll('files') as File[];
+	await addDocument(files);
+	return c.json({ message: 'Documents added successfully' });
 });
 
 app.get('/knowledge', async (c) => {
-	const mapStub = c.env.MAP.getByName(mapDOName);
-	return c.json({ documentIds: await mapStub.getDocumentsIDs() });
+	const documentsStub = c.env.DOCUMENTS.getByName(documentsDOName);
+	return c.json({ documents: await documentsStub.getDocuments() });
 });
 
-app.delete('/knowledge/:id', async (c) => {
-	const documentId = c.req.param('id');
-	return c.json({ documentId: await deleteDocument(documentId) });
+app.delete('/knowledge/:name', async (c) => {
+	try {
+		const documentName = c.req.param('name');
+		await deleteDocument(documentName);
+		return c.json({ message: 'Document deleted successfully' });
+	} catch (error) {
+		return c.json({ error: (error as Error).message }, 400);
+	}
+});
+
+// Admin endpoints for testing
+app.delete('/vectors', async (c) => {
+	const { ids } = await c.req.json<{ ids: string[] }>();
+	await c.env.VECTORIZE.deleteByIds(ids);
+	return c.json({ success: true });
+});
+app.delete('/documents/all', async (c) => {
+	const documentsStub = c.env.DOCUMENTS.getByName(documentsDOName);
+	await documentsStub.deleteAll();
+	return c.json({ success: true });
 });
 
 // WebSocket

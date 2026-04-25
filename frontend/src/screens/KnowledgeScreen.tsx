@@ -1,19 +1,13 @@
-import Button from "../components/Button";
-
+import { useEffect } from "react";
+import DocListing from "../components/knowledge/DocListing";
 export default function KnowledgeScreen({ httpUrl }: { httpUrl: string }) {
+	useEffect(() => {
+		document.title = "Knowledge base";
+	}, []);
+
 	return (
-		<div className="flex flex-col w-full">
-			<p className="text-lg text-white font-semibold">
-				Page under development
-			</p>
-			<p className="text-lg text-white font-semibold"></p>
-			<div className="w-full">
-				<Button
-					link="/dialogue"
-					text="Try the dialogue chat instead!"
-					color="tbot"
-				/>
-			</div>
+		<div className="flex-1">
+			<DocListing httpUrl={httpUrl} />
 		</div>
 	);
 }

@@ -54,3 +54,6 @@ In this project, AI was used as a development "co-pilot" specifically for:
 - **Backend:** Cloudflare Workers
 - **LLM:** Llama 3.3 (llama-3.3-70b-instruct-fp8-fast) - Meta
 - **Embedding:** BAAI General Embedding (bge-base-en-v1.5) - BAAI
+
+OPTIMIZATIONS:
+-verify websocket error (sending message when websocket is opening)

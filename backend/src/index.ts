@@ -53,14 +53,15 @@ app.delete('/dialogues/:id', (c) => {
 app.post('/knowledge', async (c) => {
 	const formData = await c.req.formData();
 	const files = formData.getAll('files') as File[];
-	const { alreadyExists, emptyFiles } = await addDocument(files);
+	const { notPlain, alreadyExists, emptyFiles } = await addDocument(files);
 
-	if (alreadyExists.length === 0 && emptyFiles.length === 0) {
+	if (alreadyExists.length === 0 && emptyFiles.length === 0 && notPlain.length === 0) {
 		return c.json({ message: 'Documents added successfully' });
 	}
 
 	return c.json({
 		message: 'Some documents were not added',
+		notPlain,
 		alreadyExists,
 		emptyFiles,
 	});
@@ -78,6 +79,15 @@ app.delete('/knowledge/:name', async (c) => {
 	} catch (error) {
 		return c.json({ error: (error as Error).message }, 400);
 	}
+});
+
+// WebSocket
+app.get('knowledge/ws', (c) => {
+	if (c.req.header('Upgrade') !== 'websocket') {
+		return c.json({ error: 'Expected WebSocket' }, 426);
+	}
+	const chatStub = c.env.CHAT_ROOM.getByName(chatRoomDOName);
+	return chatStub.fetch(c.req.raw);
 });
 
 // Testing endpoints

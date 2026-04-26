@@ -37,15 +37,17 @@ export class DeleteDocumentWorkflow extends WorkflowEntrypoint<Env, Params> {
 			const toolDescriptionsStub = this.env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
 			const entries = await documentsStub.getDocuments();
 
+			//FIXME: The description is not being removed when there are no documents
 			//If no documents remain, reset the tool description
 			const hasActiveDocuments = entries.some((e: Document) => e.status !== 'deleting');
+			console.log(name, '- Has active documents?: ', hasActiveDocuments);
 			if (!hasActiveDocuments) {
 				await toolDescriptionsStub.updateToolDescription('');
 				return;
 			}
 
 			//Or just create a new one and update it
-			const currentDescription = (await toolDescriptionsStub.getToolDescription()) ?? '';
+			const currentDescription = await toolDescriptionsStub.getToolDescription();
 			const thisResumee = await documentsStub.getDocument(name as string);
 			const messages = remove_search_documents_instructions(currentDescription, thisResumee);
 			const newDescription = (await this.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Button from "./Button";
+import CommonButton from "../CommonButton";
 import type { Dialogue } from "../../screens/DialogueScreen";
 import Popup from "../Popup";
 import axios from "axios";
@@ -51,17 +51,17 @@ export default function Sidebar({
 			<div className="w-1/3 max-w-75 bg-dark-gray flex flex-col ">
 				<div className="flex flex-col gap-1 pt-4 pb-2">
 					<div className="px-2">
-						<Button to="/home" icon="home" text="Home" />
+						<CommonButton to="/home" icon="home" text="Home" />
 					</div>
 					<div className="px-2">
-						<Button
+						<CommonButton
 							to="/knowledge"
 							icon="brain"
 							text="Knowledge base"
 						/>
 					</div>
 					<div className="px-2">
-						<Button
+						<CommonButton
 							icon="write"
 							text="New chat"
 							func={newDialogue}
@@ -73,7 +73,7 @@ export default function Sidebar({
 					{dialogues &&
 						dialogues.map((dialogue) => (
 							<div className="px-2" key={dialogue.id}>
-								<Button
+								<CommonButton
 									text={dialogue.title}
 									active={
 										dialogue.id === activeDialID

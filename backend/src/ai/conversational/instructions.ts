@@ -45,15 +45,16 @@ export const truth_instructions = (messages: RoleScopedChatInput[]): RoleScopedC
 export const intent_instructions = (messages: RoleScopedChatInput[]): RoleScopedChatInput[] => [
 	{
 		role: 'system',
-		content: `You are an intent classifier. Analyze ONLY the last user message and call the appropriate tool. Ignore the tone or content of previous messages. The conversation history is provided only for context, not for classification.
+		content: `You are an intent classifier. Your only job is to decide which tool to call based on the last user message.
 
 		RULES:
-		- You will receive a list of messages as context.
-		- Only classify the intent of the LAST user message.
-		- Always call one of the two tools.
-		- Never respond with text. Only call a tool.`,
+		- Only analyze the LAST user message. Previous messages are context only.
+		- Always call exactly one tool. Never respond with text.
+		- Call "searchDocuments" if the last user message asks about something that could be answered by the knowledge base, even if indirectly (e.g. asking about a specific brand or instance of something the knowledge base covers).
+		- Call "generic" only if the last user message is clearly unrelated to the knowledge base.
+		- When in doubt, prefer "searchDocuments".`,
 	},
-	{ role: 'user', content: JSON.stringify(messages) },
+	...messages,
 ];
 
 export const title_instructions = (prompt: string): RoleScopedChatInput[] => [
@@ -78,15 +79,20 @@ export const resumee_instructions = (content: string): RoleScopedChatInput[] => 
 export const search_documents_instructions = (currentDescription: string, newSummary: string): RoleScopedChatInput[] => [
 	{
 		role: 'system',
-		content: `You are a tool description assistant. You will receive an existing tool description and a new document summary. Your task is to merge them into a single updated description that reflects all the documents the tool can answer questions about.
+		content: `You are a tool description manager. You maintain a description of what a search tool can answer based on its indexed documents.
+
+		Your task is to update the existing description by integrating a new document summary.
+
+		The description has two parts:
+		1. A "WHEN TO CALL" section that explicitly tells the intent classifier when to call this tool, including topics, keywords, entities, and examples of questions that should trigger it.
+		2. A "FACTS" section that lists the specific facts the tool knows, verbatim from the documents.
 
 		RULES:
-		- Keep the description concise, 3-5 sentences maximum
-		- Write in plain flowing text, no bullet points or headers
-		- The description should explain what topics and questions the tool can answer
-		- Preserve relevant information from the existing description
-		- Integrate the new summary naturally
-		- Respond in English`,
+		- The "WHEN TO CALL" section must be broad enough to catch indirect questions (e.g. if the knowledge base knows about cars, mention car brands, models, features, colors, wheels, seats, etc. as triggers).
+		- The "FACTS" section must include every specific concrete fact from all documents, never generalize or omit.
+		- Never use bullet points, headers, or markdown.
+		- Keep it concise: 4-8 sentences maximum total.
+		- Respond with ONLY the updated description, no preamble or explanation.`,
 	},
 	{
 		role: 'user',
@@ -98,14 +104,19 @@ export const search_documents_instructions = (currentDescription: string, newSum
 export const remove_search_documents_instructions = (currentDescription: string, summaryToRemove: string): RoleScopedChatInput[] => [
 	{
 		role: 'system',
-		content: `You are a tool description assistant. You will receive an existing tool description and a summary of a document that has been removed.
+		content: `You are a tool description manager. You maintain a description of what a search tool can answer based on its indexed documents.
+
+		Your task is to update the existing description by removing the contribution of a document that was deleted.
 
 		RULES:
-		- Remove only the information that comes exclusively from the removed document summary
-		- Preserve all information that comes from other documents
-		- Keep the description concise, 3-5 sentences maximum
-		- Write in plain flowing text, no bullet points or headers
-		- Respond in English`,
+		- Identify what facts or topics come exclusively from the removed document summary and remove them from the description.
+		- Preserve all facts and topics that come from other documents — do not remove or alter them.
+		- If the current description no longer contains the content of the summary of the removed document, reply by returning the current description exactly as it is
+		- The description must remain optimized so that an intent classifier can determine if a user question can be answered by this tool.
+		- Write in plain flowing English. No bullet points, no headers, no markdown.
+		- Keep it concise: 3-6 sentences maximum.
+		- If no relevant information remains, respond with an empty string.
+		- Respond with ONLY the updated description, no preamble or explanation.`,
 	},
 	{
 		role: 'user',

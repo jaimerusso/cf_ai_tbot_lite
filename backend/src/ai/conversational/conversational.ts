@@ -31,6 +31,8 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 		const [toolName, toolArgs] = await step.do('get-intent', async () => {
 			return await getIntent(messages);
 		});
+		console.log('toolCall detected: ', toolName);
+		console.log('toolArgs detected: ', toolArgs);
 
 		//Step 4: Search documents if needed
 		console.log('Step 4: Search documents if needed');
@@ -40,8 +42,6 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 			}
 			return null;
 		});
-
-		console.log('Tool result CHAT WORKFLOW: ', searchResult);
 
 		//Step 4.1: Append tool result if Step 4 was sucessfully performed
 		console.log('Step 4.1: Append tool result if Step 4 was sucessfully performed');
@@ -96,14 +96,18 @@ export async function generateTitle(prompt: string): Promise<string> {
 }
 
 //Get the intent of the user and return the tool to call (or fallback - generic) and the arguments to call it (or the original prompt)
+//Not too accurate
 async function getIntent(messages: RoleScopedChatInput[]): Promise<[string, string]> {
 	const instructions = intent_instructions(messages);
+	const toolList = await tools();
 	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
 		messages: instructions,
-		tools: await tools(),
+		tools: toolList,
 	})) as any;
 
 	const toolCalls = response.tool_calls;
+
+	console.log('\nGet intent response: ', response);
 
 	//Check if tool_calls is empty and return default response if it is
 	if (!toolCalls || toolCalls.length === 0) {
@@ -118,4 +122,37 @@ async function getIntent(messages: RoleScopedChatInput[]): Promise<[string, stri
 		default:
 			return [tool.name, ''];
 	}
+}
+
+async function newGetIntent(messages: RoleScopedChatInput[]): Promise<[string, string]> {
+	const toolList = await tools();
+	const lastMessage = messages[messages.length - 1].content;
+
+	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+		messages: [
+			{
+				role: 'system',
+				content: `You are an intent classifier. Given a user query, decide if it could be answered by searching the following knowledge base, or if it is a generic question.
+
+				Knowledge base description:
+				${toolList[0].description}
+
+				Reply with ONLY one of:
+				- "search: <optimized query>" if the question might be answered by the knowledge base
+				- "generic" if it is a general question
+
+				Never explain. Never add anything else.`,
+			},
+			{ role: 'user', content: lastMessage as string },
+		],
+	})) as any;
+
+	const text = response.response?.trim() ?? '';
+
+	if (text.startsWith('search:')) {
+		const query = text.replace('search:', '').trim();
+		return ['searchDocuments', query];
+	}
+
+	return ['generic', ''];
 }

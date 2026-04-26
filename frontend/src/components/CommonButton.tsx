@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import write from "../../assets/write.svg";
-import brain from "../../assets/brain.svg";
-import home from "../../assets/home.svg";
-import trash from "../../assets/trash.svg";
+import write from "../assets/write.svg";
+import brain from "../assets/brain.svg";
+import home from "../assets/home.svg";
+import trash from "../assets/trash.svg";
 
-export default function Button({
+export default function CommonButton({
 	icon,
 	text,
 	to,
@@ -12,6 +12,7 @@ export default function Button({
 	func,
 	deletable,
 	deleteFunc,
+	noHover,
 }: {
 	icon?: "write" | "brain" | "home";
 	text: string;
@@ -20,6 +21,7 @@ export default function Button({
 	func?: () => void;
 	deletable?: boolean;
 	deleteFunc?: () => void;
+	noHover?: boolean;
 }) {
 	const icons = {
 		write,
@@ -28,8 +30,8 @@ export default function Button({
 	};
 
 	const style =
-		"w-full h-fit flex flex-row gap-3 hover:bg-gray hover:cursor-pointer rounded-xl px-3 py-1 relative group select-none " +
-		(active ? "bg-gray" : "hover:bg-gray");
+		"w-full h-fit flex flex-row gap-3 hover:cursor-pointer rounded-xl px-3 py-1 relative group select-none" +
+		(active ? " bg-gray" : noHover ? "" : " hover:bg-gray");
 
 	const content = (
 		<div className={style}>

@@ -57,7 +57,7 @@ export async function deleteDocument(name: string) {
 		throw new Error(`Document is already being deleted: ${name}`);
 	}
 
-	env.DELETE_DOCUMENT_WORKFLOW.create({
+	await env.DELETE_DOCUMENT_WORKFLOW.create({
 		params: { name },
 	});
 

@@ -19,7 +19,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		return localStorage.getItem("infoSeen") !== "true";
 	});
 	const [dragging, setDragging] = useState(false);
-	const [hadAction, setHadAction] = useState(false);
 
 	const pollRef = useRef(false);
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -46,19 +45,19 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		axios.get(`${httpUrl}/knowledge`).then((res) => {
 			const resDocs = res.data.documents as Document[];
 			setLoading(false);
-			setDocuments(resDocs);
 
 			//If the res docs are different from the saved docs, it must check if needs to stop polling
-			if (resDocs !== documents) {
+			if (JSON.stringify(resDocs) !== JSON.stringify(documents)) {
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
 				pollRef.current = hasNonReady;
+				setDocuments(resDocs);
 			}
 		});
 	};
 
 	//Poll documents
 	const startPolling = () => {
-		if (intervalRef.current) return; // já está a fazer polling
+		if (intervalRef.current) return;
 		pollRef.current = true;
 		intervalRef.current = setInterval(() => {
 			if (!pollRef.current) {

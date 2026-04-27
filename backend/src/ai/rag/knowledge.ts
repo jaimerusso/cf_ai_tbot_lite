@@ -33,7 +33,7 @@ export async function addDocument(documents: File[]) {
 				if (content.length === 0) {
 					emptyFiles.push(name);
 				} else {
-					env.INGEST_WORKFLOW.create({
+					await env.INGEST_WORKFLOW.create({
 						params: { name: document.name, content },
 					});
 				}

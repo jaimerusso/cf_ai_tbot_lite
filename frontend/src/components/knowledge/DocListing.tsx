@@ -13,7 +13,6 @@ type Document = {
 export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const [documents, setDocuments] = useState<Document[]>([]);
 	const [delName, setDelName] = useState("");
-	const [poll, setPoll] = useState(true);
 	const [loading, setLoading] = useState(true);
 	const [popup, setPopup] = useState(false);
 	const [infoPopup, setInfoPopup] = useState(() => {
@@ -21,15 +20,18 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	});
 	const [dragging, setDragging] = useState(false);
 
-	const pollRef = useRef(poll);
+	const pollRef = useRef(false);
+	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	//If poll just turned on, start polling
 	useEffect(() => {
-		pollRef.current = poll;
-		if (!poll) return;
-		pollDocuments();
-	}, [poll]);
+		request();
+		startPolling();
+		return () => {
+			if (intervalRef.current) clearInterval(intervalRef.current);
+		};
+	}, []);
 
 	//No drag, transparent div
 	useEffect(() => {
@@ -42,21 +44,22 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const request = () => {
 		axios.get(`${httpUrl}/knowledge`).then((res) => {
 			const resDocs = res.data.documents as Document[];
-
 			setLoading(false);
 			setDocuments(resDocs);
 
 			const hasNonReady = resDocs.some((d) => d.status !== "ready");
-			setPoll(hasNonReady);
 			pollRef.current = hasNonReady;
 		});
 	};
 
 	//Poll documents
-	const pollDocuments = () => {
-		const interval = setInterval(() => {
+	const startPolling = () => {
+		if (intervalRef.current) return; // já está a fazer polling
+		pollRef.current = true;
+		intervalRef.current = setInterval(() => {
 			if (!pollRef.current) {
-				clearInterval(interval);
+				clearInterval(intervalRef.current!);
+				intervalRef.current = null;
 				return;
 			}
 			request();
@@ -78,7 +81,8 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const deleteDocument = (name: string) => {
 		setPopup(false);
 		axios.delete(`${httpUrl}/knowledge/${name}`);
-		setPoll(true);
+		pollRef.current = true;
+		startPolling();
 	};
 
 	const confirmDelete = (name: string) => {
@@ -86,6 +90,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		setPopup(true);
 	};
 
+	//TODO: Finish the upload information
 	const handleUpload = async (files: FileList | null) => {
 		if (!files) return;
 
@@ -105,7 +110,8 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			console.log(resData);
 		});
 
-		setPoll(true);
+		pollRef.current = true;
+		startPolling();
 	};
 
 	const handleDrop = (e: React.DragEvent) => {

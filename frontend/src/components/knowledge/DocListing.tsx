@@ -19,7 +19,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		return localStorage.getItem("infoSeen") !== "true";
 	});
 	const [dragging, setDragging] = useState(false);
-	const [actionDocs, setActionDocs] = useState<Record<string, string>>({});
 
 	const pollRef = useRef(false);
 	const actionDocsRef = useRef<Record<string, string>>({});
@@ -54,22 +53,21 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				//Get the files that were returned with the action requested
 				const succDocs = resDocs.filter(
 					(d) =>
-						d.name in actionDocs && d.status === actionDocs[d.name]
+						d.name in actionDocsRef.current &&
+						d.status === actionDocsRef.current[d.name]
 				);
 				//and remove them from the action array
 				if (succDocs.length > 0) {
-					setActionDocs((prev) => {
-						const updated = { ...prev };
-						succDocs.forEach((d) => delete updated[d.name]);
-						return updated;
-					});
+					const updated = { ...actionDocsRef.current };
+					succDocs.forEach((d) => delete updated[d.name]);
+					actionDocsRef.current = updated;
 				}
 
+				//Stop the poll if there are no pending actions and all documents are ready (or documents array is empty)
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
 				pollRef.current =
 					hasNonReady ||
 					Object.keys(actionDocsRef.current).length > 0;
-
 				if (
 					!(
 						hasNonReady ||
@@ -120,7 +118,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			...actionDocsRef.current,
 			[name]: "deleting",
 		};
-		setActionDocs(actionDocsRef.current);
 	};
 
 	const confirmDelete = (name: string) => {
@@ -143,8 +140,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			actionDocsRef.current = {
 				...actionDocsRef.current,
 				[file.name]: "processing",
-			};
-			setActionDocs(actionDocsRef.current); //Set document names that had action
+			}; //Set document names that had action
 			formData.append("files", file);
 		});
 

@@ -49,9 +49,12 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 			//If the res docs are different from the saved docs, it must check if needs to stop polling
 			if (JSON.stringify(resDocs) !== JSON.stringify(documents)) {
-				console.log("Stopping poll");
+				console.log("checking poll");
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
 				pollRef.current = hasNonReady;
+				if (hasNonReady) {
+					console.log("poll stopped");
+				}
 				setDocuments(resDocs);
 			}
 		});
@@ -88,6 +91,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		axios.delete(`${httpUrl}/knowledge/${name}`);
 		pollRef.current = true;
 		startPolling();
+		setDocuments(documents.map((d) => ({ ...d, status: "deleting" })));
 	};
 
 	const confirmDelete = (name: string) => {
@@ -117,6 +121,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 		pollRef.current = true;
 		startPolling();
+		setDocuments(documents.map((d) => ({ ...d, status: "processing" })));
 	};
 
 	const handleDrop = (e: React.DragEvent) => {

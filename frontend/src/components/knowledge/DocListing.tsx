@@ -7,7 +7,7 @@ import newFile from "../../assets/newFile.svg";
 type Document = {
 	name: string;
 	status: string;
-	lastUpdated: string;
+	lastUpdated: number;
 };
 
 export default function DocListing({ httpUrl }: { httpUrl: string }) {
@@ -52,7 +52,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				console.log("checking poll");
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
 				pollRef.current = hasNonReady;
-				if (hasNonReady) {
+				if (!hasNonReady) {
 					console.log("poll stopped");
 				}
 				setDocuments(resDocs);
@@ -74,7 +74,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		}, 2000);
 	};
 
-	const formatDate = (value: string) => {
+	const formatDate = (value: number) => {
 		return new Date(value)
 			.toLocaleString("pt-PT", {
 				day: "2-digit",
@@ -91,7 +91,12 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		axios.delete(`${httpUrl}/knowledge/${name}`);
 		pollRef.current = true;
 		startPolling();
-		setDocuments(documents.map((d) => ({ ...d, status: "deleting" })));
+		//Fake documents on remove
+		setDocuments(
+			documents.map((d) =>
+				d.name === delName ? { ...d, status: "deleting" } : d
+			)
+		);
 	};
 
 	const confirmDelete = (name: string) => {
@@ -110,18 +115,26 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 		const formData = new FormData();
 
+		//TODO: Deal with wrong uploads in this fake
+		const fakeDocuments: Document[] = [];
 		Array.from(files).forEach((file) => {
+			const fakeDocument: Document = {
+				name: file.name,
+				status: "processing",
+				lastUpdated: Date.now(),
+			};
+			fakeDocuments.push(fakeDocument);
 			formData.append("files", file);
 		});
 
 		axios.post(`${httpUrl}/knowledge`, formData).then((res) => {
 			const resData = res.data;
+			setDocuments(fakeDocuments);
 			console.log(resData);
 		});
 
 		pollRef.current = true;
 		startPolling();
-		setDocuments(documents.map((d) => ({ ...d, status: "processing" })));
 	};
 
 	const handleDrop = (e: React.DragEvent) => {

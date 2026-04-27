@@ -7,7 +7,7 @@ import newFile from "../../assets/newFile.svg";
 type Document = {
 	name: string;
 	status: string;
-	lastUpdated: number;
+	lastUpdated?: number;
 };
 
 export default function DocListing({ httpUrl }: { httpUrl: string }) {
@@ -19,8 +19,10 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		return localStorage.getItem("infoSeen") !== "true";
 	});
 	const [dragging, setDragging] = useState(false);
+	const [actionDocs, setActionDocs] = useState<Record<string, string>>({});
 
 	const pollRef = useRef(false);
+	const actionDocsRef = useRef<Record<string, string>>({});
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -49,12 +51,29 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 			//If the res docs are different from the saved docs, it must check if needs to stop polling
 			if (JSON.stringify(resDocs) !== JSON.stringify(documents)) {
-				console.log("checking poll");
+				//Get the files that were returned with the action requested
+				const succDocs = resDocs.filter(
+					(d) =>
+						d.name in actionDocs && d.status === actionDocs[d.name]
+				);
+				//and remove them from the action array
+				if (succDocs.length > 0) {
+					setActionDocs((prev) => {
+						const updated = { ...prev };
+						succDocs.forEach((d) => delete updated[d.name]);
+						return updated;
+					});
+				}
+
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
-				pollRef.current = hasNonReady;
+				pollRef.current =
+					hasNonReady ||
+					Object.keys(actionDocsRef.current).length > 0;
+
 				if (!hasNonReady) {
 					console.log("poll stopped");
 				}
+
 				setDocuments(resDocs);
 			}
 		});
@@ -91,6 +110,12 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		axios.delete(`${httpUrl}/knowledge/${name}`);
 		pollRef.current = true;
 		startPolling();
+
+		actionDocsRef.current = {
+			...actionDocsRef.current,
+			[name]: "deleting",
+		};
+		setActionDocs(actionDocsRef.current);
 	};
 
 	const confirmDelete = (name: string) => {
@@ -109,8 +134,12 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 		const formData = new FormData();
 
-		//TODO: Deal with wrong uploads in this fake
 		Array.from(files).forEach((file) => {
+			actionDocsRef.current = {
+				...actionDocsRef.current,
+				[file.name]: "processing",
+			};
+			setActionDocs(actionDocsRef.current); //Set document names that had action
 			formData.append("files", file);
 		});
 
@@ -213,7 +242,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 								<td
 									className={`px-3 py-1 text-white whitespace-nowrap rounded-r-xl ${isReady(doc.status) ? "group-hover:opacity-50" : ""}`}
 								>
-									{formatDate(doc.lastUpdated)}
+									{formatDate(doc.lastUpdated as number)}
 								</td>
 								{isReady(doc.status) && (
 									<td className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">

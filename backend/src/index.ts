@@ -16,6 +16,7 @@ import { documentsDOName } from './durable-objects/documentsDO';
 
 import { addDocument, deleteDocument } from './ai/rag/knowledge';
 import { tools } from './ai/conversational/tools';
+import { toolDescriptionsDOName } from './durable-objects/toolDescriptionsDO';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -82,7 +83,7 @@ app.delete('/knowledge/:name', async (c) => {
 });
 
 // WebSocket
-app.get('knowledge/ws', (c) => {
+app.get('/ws', (c) => {
 	if (c.req.header('Upgrade') !== 'websocket') {
 		return c.json({ error: 'Expected WebSocket' }, 426);
 	}
@@ -104,15 +105,11 @@ app.delete('/documents/all', async (c) => {
 app.get('/tool-description', async (c) => {
 	return c.json(await tools());
 });
-/*-------------------------------------------------*/
-
-// WebSocket
-app.get('/ws', (c) => {
-	if (c.req.header('Upgrade') !== 'websocket') {
-		return c.json({ error: 'Expected WebSocket' }, 426);
-	}
-	const chatStub = c.env.CHAT_ROOM.getByName(chatRoomDOName);
-	return chatStub.fetch(c.req.raw);
+app.delete('/tool-description', async (c) => {
+	const toolDescriptionsStub = c.env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
+	await toolDescriptionsStub.updateToolDescription('');
+	return c.json({});
 });
+/*-------------------------------------------------*/
 
 export default app;

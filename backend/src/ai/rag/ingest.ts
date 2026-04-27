@@ -1,7 +1,7 @@
-import { env, WorkflowEntrypoint, WorkflowStep } from 'cloudflare:workers';
+import { WorkflowEntrypoint, WorkflowStep } from 'cloudflare:workers';
 import type { WorkflowEvent } from 'cloudflare:workers';
 import { documentsDOName } from '../../durable-objects/documentsDO';
-import { resumee_instructions, search_documents_instructions } from '../conversational/instructions';
+import { resumee_instructions } from '../conversational/instructions';
 import { toolDescriptionsDOName } from '../../durable-objects/toolDescriptionsDO';
 
 export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
@@ -43,9 +43,6 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 		});
 
 		//Step 4: Generate document resumee
-		//If is chunked, get the current resumee and update it
-		//OR
-		//Generate resumee inputting the document in a model
 		console.log(name, ' - Step 4: Generate document resumee');
 		const resumee = await step.do(`generate-resumee`, async () => {
 			const messages = resumee_instructions(content as string);
@@ -57,10 +54,7 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 		console.log(name, ' - Step 5: Generate new search documents tool description');
 		await step.do(`update-tool-description`, async () => {
 			const toolDescriptionsStub = this.env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
-			const currentDescription = (await toolDescriptionsStub.getToolDescription()) ?? '';
-			const messages = search_documents_instructions(currentDescription, resumee);
-			const newDescription = (await this.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
-			toolDescriptionsStub.updateToolDescription(newDescription.response);
+			await toolDescriptionsStub.updateToolDescription(resumee, true);
 		});
 
 		//Step 6: Update in the mapping

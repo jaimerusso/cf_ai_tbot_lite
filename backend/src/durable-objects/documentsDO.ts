@@ -1,4 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
+import { toolDescriptionsDOName } from './toolDescriptionsDO';
 
 export const documentsDOName = 'documents';
 
@@ -14,6 +15,22 @@ export type Document = {
 export class Documents extends DurableObject<Env> {
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
+	}
+
+	async updateSearchToolDescriptionOnDelete(documentName: string): Promise<void> {
+		const toolDescriptionsStub = this.env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
+		const entries = await this.getDocuments();
+
+		const hasActive = entries.some((e: Document) => e.status !== 'deleting' && e.name !== documentName);
+
+		if (!hasActive) {
+			await toolDescriptionsStub.updateToolDescription('', false, documentName);
+			return;
+		}
+
+		const deletedDocument = await this.getDocument(documentName);
+		const resumee = deletedDocument?.resumee ?? '';
+		await toolDescriptionsStub.updateToolDescription(resumee, false, documentName);
 	}
 
 	async newDocument(name: string): Promise<void> {

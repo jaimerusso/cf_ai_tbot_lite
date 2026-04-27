@@ -1,15 +1,14 @@
-import { env, WorkflowEntrypoint, WorkflowStep } from 'cloudflare:workers';
+import { WorkflowEntrypoint, WorkflowStep } from 'cloudflare:workers';
 import type { WorkflowEvent } from 'cloudflare:workers';
 import { Document, documentsDOName } from '../../durable-objects/documentsDO';
 import { toolDescriptionsDOName } from '../../durable-objects/toolDescriptionsDO';
-import { remove_search_documents_instructions } from '../conversational/instructions';
 
 export class DeleteDocumentWorkflow extends WorkflowEntrypoint<Env, Params> {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
 		console.log('\n\nStarting Delete Document Workflow...');
 		const { name } = event.payload;
 
-		const documentsStub = env.DOCUMENTS.getByName(documentsDOName);
+		const documentsStub = this.env.DOCUMENTS.getByName(documentsDOName);
 
 		//Step 1: Update the document status to deleting
 		console.log('Step 1: Update the document status to deleting');
@@ -28,37 +27,20 @@ export class DeleteDocumentWorkflow extends WorkflowEntrypoint<Env, Params> {
 		//Step 3: Delete the document embedding(s) from the vector
 		console.log('Step 3: Delete the document embedding(s) from the vector');
 		await step.do(`delete-vector`, async () => {
-			return env.VECTORIZE.deleteByIds(embeddingIds);
+			return this.env.VECTORIZE.deleteByIds(embeddingIds);
 		});
 
-		//Step 4: Generate new tool description
+		//Step 4: Generate new search documents tool description
 		console.log('Step 4: Generate new search documents tool description');
 		await step.do(`update-tool-description`, async () => {
-			const toolDescriptionsStub = this.env.TOOL_DESCRIPTIONS.getByName(toolDescriptionsDOName);
-			const entries = await documentsStub.getDocuments();
-
-			//FIXME: The description is not being removed when there are no documents
-			//If no documents remain, reset the tool description
-			const hasActiveDocuments = entries.some((e: Document) => e.status !== 'deleting');
-			console.log(name, '- Has active documents?: ', hasActiveDocuments);
-			if (!hasActiveDocuments) {
-				await toolDescriptionsStub.updateToolDescription('');
-				return;
-			}
-
-			//Or just create a new one and update it
-			const currentDescription = await toolDescriptionsStub.getToolDescription();
-			const thisResumee = await documentsStub.getDocument(name as string);
-			const messages = remove_search_documents_instructions(currentDescription, thisResumee);
-			const newDescription = (await this.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
-			toolDescriptionsStub.updateToolDescription(newDescription.response);
+			await documentsStub.updateSearchToolDescriptionOnDelete(name);
 		});
 
 		//Step 5: Await step 3: and then delete the document from the DO
 		console.log('Step 5: Await vector deletion and then delete the document from the DO');
 		await step.do(`delete-entry`, async () => {
 			while (true) {
-				const results = await env.VECTORIZE.getByIds(embeddingIds);
+				const results = await this.env.VECTORIZE.getByIds(embeddingIds);
 				if (results.length === 0) {
 					break;
 				}

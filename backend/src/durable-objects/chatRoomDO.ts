@@ -1,7 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import type { ChatParams } from '../ai/conversational/conversational';
 import { dialoguesDOName } from './dialoguesDO';
-import { pollWorkflow } from '../common/workflow';
+import { pollWorkflow } from '../common/pollWorkflow';
 
 export const chatRoomDOName = 'chat';
 

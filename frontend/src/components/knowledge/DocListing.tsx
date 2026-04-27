@@ -60,21 +60,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 					const updated = { ...actionDocsRef.current };
 					succDocs.forEach((d) => delete updated[d.name]);
 					actionDocsRef.current = updated;
-
-					setDocuments((prev) => {
-						const updated = prev
-							.map(
-								(d) =>
-									succDocs.find((s) => s.name === d.name) ?? d
-							)
-							.filter((d) =>
-								resDocs.find((r) => r.name === d.name)
-							);
-						const newDocs = succDocs.filter(
-							(s) => !prev.find((d) => d.name === s.name)
-						);
-						return [...updated, ...newDocs];
-					});
 				}
 
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
@@ -88,13 +73,10 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 						Object.keys(actionDocsRef.current).length > 0
 					)
 				) {
-					console.log("poll stopped");
+					console.log("Poll stopped");
 				}
 
-				// Só atualiza tudo se não houver ações pendentes
-				if (Object.keys(actionDocsRef.current).length === 0) {
-					setDocuments(resDocs);
-				}
+				setDocuments(resDocs);
 			}
 		});
 	};

@@ -56,11 +56,20 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 						d.name in actionDocsRef.current &&
 						d.status === actionDocsRef.current[d.name]
 				);
-				//and remove them from the action array
+				//and remove them from the action array and add update the document list with the updated documents
 				if (succDocs.length > 0) {
 					const updated = { ...actionDocsRef.current };
 					succDocs.forEach((d) => delete updated[d.name]);
 					actionDocsRef.current = updated;
+
+					setDocuments((prev) =>
+						prev.map((d) => {
+							const match = succDocs.find(
+								(s) => s.name === d.name
+							);
+							return match ? { ...d, ...match } : d;
+						})
+					);
 				}
 
 				//Stop the poll if there are no pending actions and all documents are ready (or documents array is empty)
@@ -77,7 +86,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 					console.log("poll stopped");
 				}
 
-				setDocuments(resDocs);
+				// setDocuments(resDocs);
 			}
 		});
 	};

@@ -91,12 +91,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		axios.delete(`${httpUrl}/knowledge/${name}`);
 		pollRef.current = true;
 		startPolling();
-		//Fake documents on remove
-		setDocuments(
-			documents.map((d) =>
-				d.name === delName ? { ...d, status: "deleting" } : d
-			)
-		);
 	};
 
 	const confirmDelete = (name: string) => {
@@ -116,20 +110,12 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		const formData = new FormData();
 
 		//TODO: Deal with wrong uploads in this fake
-		const fakeDocuments: Document[] = [];
 		Array.from(files).forEach((file) => {
-			const fakeDocument: Document = {
-				name: file.name,
-				status: "processing",
-				lastUpdated: Date.now(),
-			};
-			fakeDocuments.push(fakeDocument);
 			formData.append("files", file);
 		});
 
 		axios.post(`${httpUrl}/knowledge`, formData).then((res) => {
 			const resData = res.data;
-			setDocuments(fakeDocuments);
 			console.log(resData);
 		});
 

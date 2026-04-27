@@ -70,7 +70,12 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 					hasNonReady ||
 					Object.keys(actionDocsRef.current).length > 0;
 
-				if (!hasNonReady) {
+				if (
+					!(
+						hasNonReady ||
+						Object.keys(actionDocsRef.current).length > 0
+					)
+				) {
 					console.log("poll stopped");
 				}
 

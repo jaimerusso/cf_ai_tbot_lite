@@ -1,6 +1,14 @@
 import ready from "../../assets/ready.svg";
 
-export default function StatusIcon({ status }: { status?: string }) {
+export default function StatusIcon({
+	status,
+	colorToUse,
+	dim,
+}: {
+	status?: string;
+	colorToUse?: string;
+	dim?: string;
+}) {
 	if (status === "ready") {
 		return <img src={ready} alt="Ready" className="w-6" />;
 	}
@@ -10,11 +18,12 @@ export default function StatusIcon({ status }: { status?: string }) {
 		? status === "processing"
 			? "#238636"
 			: "#db4f4f"
-		: "#f00094";
+		: colorToUse;
+	const dimensions = dim ?? "24";
 	return (
 		<svg
-			width="24"
-			height="24"
+			width={dimensions}
+			height={dimensions}
 			viewBox="0 0 24 24"
 			fill=""
 			xmlns="http://www.w3.org/2000/svg"

@@ -19,6 +19,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		return localStorage.getItem("infoSeen") !== "true";
 	});
 	const [dragging, setDragging] = useState(false);
+	const [hasPendingActions, setHasPendingActions] = useState(false);
 
 	const pollRef = useRef(false);
 	const actionDocsRef = useRef<Record<string, string>>({});
@@ -77,6 +78,9 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 					console.log("poll stopped");
 				}
 
+				if (Object.keys(actionDocsRef.current).length === 0)
+					setHasPendingActions(false);
+
 				setDocuments(resDocs);
 			}
 		});
@@ -111,13 +115,15 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const deleteDocument = (name: string) => {
 		setPopup(false);
 		axios.delete(`${httpUrl}/knowledge/${name}`);
-		pollRef.current = true;
-		startPolling();
 
 		actionDocsRef.current = {
 			...actionDocsRef.current,
 			[name]: "deleting",
 		};
+		setHasPendingActions(true);
+
+		pollRef.current = true;
+		startPolling();
 	};
 
 	const confirmDelete = (name: string) => {
@@ -144,6 +150,8 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			formData.append("files", file);
 		});
 
+		setHasPendingActions(true);
+
 		axios.post(`${httpUrl}/knowledge`, formData).then((res) => {
 			const resData = res.data;
 			console.log(resData);
@@ -169,6 +177,11 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 	return (
 		<>
+			{hasPendingActions && (
+				<div className="absolute flex flex-row justify-center items-center w-full h-full z-40 bg-black/50 backdrop-blur-[1px]">
+					<Icon colorToUse="#f48120" dim="60" />
+				</div>
+			)}
 			<div
 				onDrop={(e) => handleDrop(e)}
 				onDragOver={(e) => handleDragOver(e)}
@@ -274,7 +287,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 				{loading && (
 					<div className="absolute top-50">
-						<Icon />
+						<Icon colorToUse="#f00094" />
 					</div>
 				)}
 			</div>

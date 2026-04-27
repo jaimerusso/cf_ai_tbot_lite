@@ -19,6 +19,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		return localStorage.getItem("infoSeen") !== "true";
 	});
 	const [dragging, setDragging] = useState(false);
+	const [hadAction, setHadAction] = useState(false);
 
 	const pollRef = useRef(false);
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -47,8 +48,11 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			setLoading(false);
 			setDocuments(resDocs);
 
-			const hasNonReady = resDocs.some((d) => d.status !== "ready");
-			pollRef.current = hasNonReady;
+			//If the res docs are different from the saved docs, it must check if needs to stop polling
+			if (resDocs !== documents) {
+				const hasNonReady = resDocs.some((d) => d.status !== "ready");
+				pollRef.current = hasNonReady;
+			}
 		});
 	};
 

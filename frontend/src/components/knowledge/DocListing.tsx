@@ -48,8 +48,14 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			const resDocs = res.data.documents as Document[];
 			setLoading(false);
 
+			console.log("resdocs: ", resDocs);
+			console.log("resdocs: ", documents);
+
 			//If the res docs are different from the saved docs, it must check if needs to stop polling
-			if (JSON.stringify(resDocs) !== JSON.stringify(documents)) {
+			if (
+				JSON.stringify(resDocs) !== JSON.stringify(documents) ||
+				resDocs.length === 0
+			) {
 				const succDocs = resDocs.filter(
 					(d) =>
 						d.name in actionDocsRef.current &&
@@ -66,6 +72,12 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				pollRef.current =
 					hasNonReady ||
 					Object.keys(actionDocsRef.current).length > 0;
+
+				console.log("test:", hasNonReady);
+				console.log(
+					"test:",
+					Object.keys(actionDocsRef.current).length > 0
+				);
 
 				if (
 					!(
@@ -115,14 +127,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			...actionDocsRef.current,
 			[name]: "deleting",
 		};
-
-		setDocuments(
-			documents.map((d) =>
-				d.name === name
-					? { ...d, status: "deleting", lastUpdated: Date.now() }
-					: d
-			)
-		);
 
 		pollRef.current = true;
 		startPolling();

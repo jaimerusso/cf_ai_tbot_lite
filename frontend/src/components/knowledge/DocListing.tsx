@@ -43,11 +43,13 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	//Get documents, turn off poll if all are ready, turn on if there is at least one that isnt
 	const request = () => {
 		axios.get(`${httpUrl}/knowledge`).then((res) => {
+			console.log("Received res");
 			const resDocs = res.data.documents as Document[];
 			setLoading(false);
 
 			//If the res docs are different from the saved docs, it must check if needs to stop polling
 			if (JSON.stringify(resDocs) !== JSON.stringify(documents)) {
+				console.log("Stopping poll");
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
 				pollRef.current = hasNonReady;
 				setDocuments(resDocs);

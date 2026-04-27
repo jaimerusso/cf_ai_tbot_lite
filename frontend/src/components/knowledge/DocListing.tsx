@@ -50,33 +50,38 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 			//If the res docs are different from the saved docs, it must check if needs to stop polling
 			if (JSON.stringify(resDocs) !== JSON.stringify(documents)) {
-				//Get the files that were returned with the action requested
 				const succDocs = resDocs.filter(
 					(d) =>
 						d.name in actionDocsRef.current &&
 						d.status === actionDocsRef.current[d.name]
 				);
-				//and remove them from the action array and add update the document list with the updated documents
+
 				if (succDocs.length > 0) {
 					const updated = { ...actionDocsRef.current };
 					succDocs.forEach((d) => delete updated[d.name]);
 					actionDocsRef.current = updated;
 
-					setDocuments((prev) =>
-						prev.map((d) => {
-							const match = succDocs.find(
-								(s) => s.name === d.name
+					setDocuments((prev) => {
+						const updated = prev
+							.map(
+								(d) =>
+									succDocs.find((s) => s.name === d.name) ?? d
+							)
+							.filter((d) =>
+								resDocs.find((r) => r.name === d.name)
 							);
-							return match ? { ...d, ...match } : d;
-						})
-					);
+						const newDocs = succDocs.filter(
+							(s) => !prev.find((d) => d.name === s.name)
+						);
+						return [...updated, ...newDocs];
+					});
 				}
 
-				//Stop the poll if there are no pending actions and all documents are ready (or documents array is empty)
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
 				pollRef.current =
 					hasNonReady ||
 					Object.keys(actionDocsRef.current).length > 0;
+
 				if (
 					!(
 						hasNonReady ||
@@ -86,7 +91,10 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 					console.log("poll stopped");
 				}
 
-				// setDocuments(resDocs);
+				// Só atualiza tudo se não houver ações pendentes
+				if (Object.keys(actionDocsRef.current).length === 0) {
+					setDocuments(resDocs);
+				}
 			}
 		});
 	};

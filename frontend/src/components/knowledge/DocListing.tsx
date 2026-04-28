@@ -12,6 +12,15 @@ type Document = {
 
 export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const actionDocsRef = useRef<Record<string, string>>({});
+
+	const buildDocumentList = (): Document[] => {
+		const saved = localStorage.getItem("documents");
+		const savedActions = localStorage.getItem("actionDocs");
+		if (savedActions) actionDocsRef.current = JSON.parse(savedActions);
+		if (!saved) return [];
+		return JSON.parse(saved) as Document[];
+	};
+
 	const [documents, setDocuments] = useState<Document[]>(() =>
 		buildDocumentList()
 	);
@@ -32,14 +41,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const inputRef = useRef<HTMLInputElement>(null);
-
-	const buildDocumentList = (): Document[] => {
-		const saved = localStorage.getItem("documents");
-		const savedActions = localStorage.getItem("actionDocs");
-		if (savedActions) actionDocsRef.current = JSON.parse(savedActions);
-		if (!saved) return [];
-		return JSON.parse(saved) as Document[];
-	};
 
 	//Save documents in cache
 	useEffect(() => {
@@ -221,6 +222,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				};
 				updateActionDocs(updated);
 
+				//Fake status doc for better UX
 				const fakeDoc: Document = {
 					name: file.name,
 					status: "processing",

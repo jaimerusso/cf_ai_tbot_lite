@@ -36,7 +36,7 @@ export default function Sidebar({
 					if (updated.length > 0) {
 						selectDialogue(updated[0].id);
 					} else {
-						selectDialogue("");
+						newDialogue();
 					}
 					return updated;
 				});

@@ -46,9 +46,9 @@ export default function Messages({
 				<div className="flex mb-6 justify-start">
 					<div className="rounded-2xl p-3 bg-gray w-fit">
 						<div className="flex gap-1 items-center">
-							<span className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0ms]"></span>
-							<span className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:150ms]"></span>
-							<span className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:300ms]"></span>
+							<span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:0ms]"></span>
+							<span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:150ms]"></span>
+							<span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:300ms]"></span>
 						</div>
 					</div>
 				</div>

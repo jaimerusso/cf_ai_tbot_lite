@@ -28,6 +28,8 @@ export default function DialogueScreen({
 				setDialogues(resDialogues);
 				console.log(resDialogues[0].id);
 				setActiveDialID(resDialogues[0].id);
+			} else {
+				setDialogueTitle("New chat");
 			}
 		});
 	}, []);

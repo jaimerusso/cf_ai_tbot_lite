@@ -246,7 +246,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				className={`absolute flex flex-row justify-center items-center w-full h-full z-40 opacity-0 border-white border-6 border-dashed ${dragging ? "bg-black/50 backdrop-blur-[1px] opacity-100" : ""}`}
 				style={{ pointerEvents: dragging ? "all" : "none" }}
 			>
-				<p className="text-white text-4xl font-bold">
+				<p className="text-white text-4xl font-bold pointer-events-none">
 					Drop files to upload
 				</p>
 			</div>

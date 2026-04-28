@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { Message } from "./Chat";
+import ReactMarkdown from "react-markdown";
 
 export default function Messages({
 	messages,
@@ -36,8 +37,8 @@ export default function Messages({
 						key={index}
 						className={`flex mb-6 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
 					>
-						<div className="rounded-2xl p-3 bg-gray w-fit max-w-[80%]">
-							<p className="text-white">{msg.content}</p>
+						<div className="rounded-2xl p-3 bg-gray w-fit max-w-[80%] text-white prose prose-white prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0.5 prose-li:leading-snug">
+							<ReactMarkdown>{msg.content}</ReactMarkdown>
 						</div>
 					</div>
 				))}

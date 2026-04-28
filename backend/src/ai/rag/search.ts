@@ -31,7 +31,7 @@ export class SearchWorkflow extends WorkflowEntrypoint<Env, Params> {
 		console.log('Step 3: Transform matches in string list');
 		const matchStrings = await step.do(`transform-matches`, async () => {
 			return matches.matches.map((match) => {
-				return match.metadata?.content;
+				return match.metadata?.chunk;
 			});
 		});
 

@@ -43,8 +43,6 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 			return null;
 		});
 
-		console.log('\n\n Search result: ', searchResult);
-
 		//Step 4.1: Append tool result if Step 4 was sucessfully performed
 		console.log('Step 4.1: Append tool result if Step 4 was sucessfully performed');
 		messages = await step.do('append-tool-result', async () => {
@@ -65,8 +63,6 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 			}
 			return messages;
 		});
-
-		console.log('\n\n Messages: ', messages);
 
 		//Step 5: Get final response from the model
 		console.log('Step 5: Get final response from the model');

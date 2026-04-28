@@ -77,6 +77,36 @@
 			"remote": true,
 		},
 	],
+	//Just to use a different vectorize
+	"env": {
+		"dev": {
+			"durable_objects": {
+				"bindings": [
+					{ "class_name": "Dialogues", "name": "DIALOGUES" },
+					{ "class_name": "ChatRoom", "name": "CHAT_ROOM" },
+					{ "class_name": "Documents", "name": "DOCUMENTS" },
+					{ "class_name": "ToolDescriptions", "name": "TOOL_DESCRIPTIONS" },
+				],
+			},
+			"workflows": [
+				{ "name": "chat", "binding": "CHAT_WORKFLOW", "class_name": "ChatWorkflow" },
+				{ "name": "search", "binding": "SEARCH_WORKFLOW", "class_name": "SearchWorkflow" },
+				{ "name": "ingest", "binding": "INGEST_WORKFLOW", "class_name": "IngestWorkflow" },
+				{ "name": "deleteDocument", "binding": "DELETE_DOCUMENT_WORKFLOW", "class_name": "DeleteDocumentWorkflow" },
+			],
+			"ai": {
+				"binding": "AI",
+				"remote": true,
+			},
+			"vectorize": [
+				{
+					"binding": "VECTORIZE",
+					"index_name": "doc-search-dev",
+					"remote": true,
+				},
+			],
+		},
+	},
 	/**
 	 * Smart Placementclaro
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

@@ -2,7 +2,6 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon";
 import Popup from "../Popup";
-import newFile from "../../assets/newFile.svg";
 
 type Document = {
 	name: string;

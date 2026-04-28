@@ -38,7 +38,7 @@ export default function Input({
 					/>
 					<a
 						className={`flex ${waitingResponse ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-						onClick={waitingResponse ? handleSend : () => {}}
+						onClick={!waitingResponse ? handleSend : () => {}}
 					>
 						<img src={send} alt="Send" />
 					</a>

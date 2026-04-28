@@ -85,12 +85,22 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 						d.status === actionDocsRef.current[d.name]
 				);
 
-				if (succDocs.length > 0) {
+				const deletedDocs = Object.keys(actionDocsRef.current)
+					.filter(
+						(name) => actionDocsRef.current[name] === "deleting"
+					)
+					.filter((name) => !resDocs.find((d) => d.name === name));
+
+				const allSucceeded = [
+					...succDocs.map((d) => d.name),
+					...deletedDocs,
+				];
+
+				if (allSucceeded.length > 0) {
 					const updated = { ...actionDocsRef.current };
-					succDocs.forEach((d) => delete updated[d.name]);
+					allSucceeded.forEach((name) => delete updated[name]);
 					updateActionDocs(updated);
 				}
-
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
 				pollRef.current =
 					hasNonReady ||

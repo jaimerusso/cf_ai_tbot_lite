@@ -16,8 +16,8 @@ export class DeleteDocumentWorkflow extends WorkflowEntrypoint<Env, Params> {
 			await documentsStub.updateDocument(name as string, { status: 'deleting' });
 		});
 
-		//Step 2: Get the embeddings ids from the mapping and delete the entry
-		console.log('Step 2: Get the embeddings ids from the mapping and delete the entry');
+		//Step 2: Get the embeddings ids from the DO
+		console.log('Step 2: Get the embeddings ids from the DO');
 		const embeddingIds = await step.do(`get-embedding-ids`, async () => {
 			const document = await documentsStub.getDocument(name as string);
 			const embeddingIds = document?.embeddingIds || [];

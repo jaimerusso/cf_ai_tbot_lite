@@ -28,6 +28,7 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 			return values;
 		});
 
+		//TODO: Could be chunked in the future!
 		//Step 3: Insert the embedding and text into the vector database
 		console.log(name, ' - Step 3: Insert the embedding and text into the vector database');
 		const ids = await step.do(`insert-vector`, async () => {

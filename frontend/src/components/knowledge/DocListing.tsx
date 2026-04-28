@@ -83,7 +83,14 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 					console.log("Poll stopped");
 				}
 
-				setDocuments(resDocs);
+				// Update documents, preserving the "deleting" status for documents pending deletion to avoid stale states from the server response
+				setDocuments(
+					resDocs.map((doc) =>
+						actionDocsRef.current[doc.name] === "deleting"
+							? { ...doc, status: "deleting" }
+							: doc
+					)
+				);
 			}
 		});
 	};
@@ -123,6 +130,12 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			[name]: "deleting",
 		};
 
+		setDocuments(
+			documents.map((doc) =>
+				doc.name === name ? { ...doc, status: "deleting" } : doc
+			)
+		);
+
 		pollRef.current = true;
 		startPolling();
 	};
@@ -132,7 +145,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		setPopup(true);
 	};
 
-	//TODO: Finish the upload information
 	const handleUpload = async (files: FileList | null) => {
 		if (!files) return;
 

@@ -11,7 +11,10 @@ type Document = {
 };
 
 export default function DocListing({ httpUrl }: { httpUrl: string }) {
-	const [documents, setDocuments] = useState<Document[]>([]);
+	const actionDocsRef = useRef<Record<string, string>>({});
+	const [documents, setDocuments] = useState<Document[]>(() =>
+		buildDocumentList()
+	);
 	const [delName, setDelName] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [popup, setPopup] = useState(false);
@@ -25,17 +28,29 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const [emptyFilesDocs, setEmptyFiles] = useState<string[]>([]);
 
 	const pollRef = useRef(false);
-	const actionDocsRef = useRef<Record<string, string>>({});
+
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const inputRef = useRef<HTMLInputElement>(null);
 
+	const buildDocumentList = (): Document[] => {
+		const saved = localStorage.getItem("documents");
+		const savedActions = localStorage.getItem("actionDocs");
+		if (savedActions) actionDocsRef.current = JSON.parse(savedActions);
+		if (!saved) return [];
+		return JSON.parse(saved) as Document[];
+	};
+
+	//Save documents in cache
+	useEffect(() => {
+		localStorage.setItem("documents", JSON.stringify(documents));
+	}, [documents]);
+
 	useEffect(() => {
 		request();
-		startPolling();
-		return () => {
-			if (intervalRef.current) clearInterval(intervalRef.current);
-		};
+		if (Object.keys(actionDocsRef.current).length > 0) {
+			startPolling();
+		}
 	}, []);
 
 	//No drag, transparent div
@@ -44,6 +59,11 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		document.addEventListener("dragenter", handleDragEnter);
 		return () => document.removeEventListener("dragenter", handleDragEnter);
 	}, []);
+
+	const updateActionDocs = (updated: Record<string, string>) => {
+		actionDocsRef.current = updated;
+		localStorage.setItem("actionDocs", JSON.stringify(updated));
+	};
 
 	//Get documents, turn off poll if all are ready, turn on if there is at least one that isnt
 	const request = () => {
@@ -66,7 +86,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				if (succDocs.length > 0) {
 					const updated = { ...actionDocsRef.current };
 					succDocs.forEach((d) => delete updated[d.name]);
-					actionDocsRef.current = updated;
+					updateActionDocs(updated);
 				}
 
 				const hasNonReady = resDocs.some((d) => d.status !== "ready");
@@ -143,10 +163,11 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		setPopup(false);
 		axios.delete(`${httpUrl}/knowledge/${name}`);
 
-		actionDocsRef.current = {
+		const updated = {
 			...actionDocsRef.current,
 			[name]: "deleting",
 		};
+		updateActionDocs(updated);
 
 		setDocuments(
 			documents.map((doc) =>
@@ -183,6 +204,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		const alreadyExists: string[] = [];
 		const emptyFiles: string[] = [];
 
+		console.log("requesting backend");
 		const res = await axios.post(`${httpUrl}/knowledge`, formData);
 		const resData = res.data;
 		notPlain.push(...(resData.notPlain ?? []));
@@ -193,22 +215,18 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		const errorFiles = [...notPlain, ...alreadyExists, ...emptyFiles];
 		Array.from(files).forEach((file) => {
 			if (!errorFiles.includes(file.name)) {
-				actionDocsRef.current = {
+				const updated = {
 					...actionDocsRef.current,
 					[file.name]: "processing",
 				};
+				updateActionDocs(updated);
 
-				setDocuments(
-					documents.map((doc) =>
-						doc.name === file.name
-							? {
-									...doc,
-									status: "processing",
-									lastUpdated: Date.now(),
-								}
-							: doc
-					)
-				);
+				const fakeDoc: Document = {
+					name: file.name,
+					status: "processing",
+					lastUpdated: Date.now(),
+				};
+				setDocuments((prev) => [...prev, fakeDoc]);
 			}
 		});
 

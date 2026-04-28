@@ -30,7 +30,7 @@ export default function HomeScreen({ IP }: { IP: string }) {
 							entirely on Cloudflare's ecosystem, the frontend as
 							a{" "}
 							<a
-								className="text-cf font-semibold "
+								className="text-cf font-semibold hover:underline"
 								href="https://cf-ai-tbot-lite.pages.dev/"
 								target="_blank"
 							>
@@ -38,7 +38,7 @@ export default function HomeScreen({ IP }: { IP: string }) {
 							</a>{" "}
 							and the backend as a{" "}
 							<a
-								className="text-cf font-semibold "
+								className="text-cf font-semibold hover:underline"
 								href={`https://${IP}`}
 								target="_blank"
 							>
@@ -47,7 +47,7 @@ export default function HomeScreen({ IP }: { IP: string }) {
 							, leveraging Workers AI for document ingestion and
 							conversational dialogue. <br></br>
 							<a
-								className="text-blue-700 font-semibold "
+								className="text-blue-700 font-semibold hover:underline"
 								href="https://www.linkedin.com/in/jaime-russo-13053422b/"
 								target="_blank"
 							>

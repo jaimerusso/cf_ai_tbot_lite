@@ -36,14 +36,14 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const [alreadyExistsDocs, setAlreadyExists] = useState<string[]>([]);
 	const [emptyFilesDocs, setEmptyFiles] = useState<string[]>([]);
 
+	const documentsRef = useRef(documents);
 	const pollRef = useRef(false);
-
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	//Save documents in cache
 	useEffect(() => {
+		documentsRef.current = documents;
 		localStorage.setItem("documents", JSON.stringify(documents));
 	}, [documents]);
 
@@ -75,7 +75,8 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 			//If the res docs are different from the saved docs, it must check if needs to stop polling
 			if (
-				JSON.stringify(resDocs) !== JSON.stringify(documents) ||
+				JSON.stringify(resDocs) !==
+					JSON.stringify(documentsRef.current) ||
 				resDocs.length === 0
 			) {
 				const succDocs = resDocs.filter(

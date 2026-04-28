@@ -57,42 +57,32 @@ export default function Chat({
 		if (socket && socket.readyState === WebSocket.OPEN && dialogueId) {
 			sendMessageRequest(prompt, dialogueId);
 		} else {
-			//Reopen Websocket and retry sending message
 			socket = new WebSocket(wsUrl);
 			ws.current = socket;
-			socket.onopen = () => {
-				console.log("WebSocket opened");
-				sendMessageRequest(prompt, dialogueId);
-			};
+			setupSocket(socket, dialogueId, prompt); // <-- passa prompt e dialogueId
 		}
 	};
 
-	useEffect(() => {
-		if (!wsUrl) return;
-
-		const socket = new WebSocket(wsUrl);
-		ws.current = socket;
-
+	const setupSocket = (
+		socket: WebSocket,
+		dialogueId?: string,
+		prompt?: string
+	) => {
 		socket.onopen = () => {
 			console.log("WebSocket opened");
+			if (dialogueId && prompt) {
+				sendMessageRequest(prompt, dialogueId);
+			}
 		};
 
 		socket.onmessage = (event) => {
 			const { title, response } = JSON.parse(event.data);
-			console.log("waiting res: ", waitingResponse);
-
-			//If waiting, append to messages
 			if (waitingResponseRef.current) {
-				//Update waiting response state
 				setWaitingResponse(false);
 				waitingResponseRef.current = false;
-				//Update messages with assistant response
 				setMessages((prev) => [
 					...prev,
-					{
-						role: "assistant",
-						content: response,
-					},
+					{ role: "assistant", content: response },
 				]);
 				if (title) {
 					setDialogueTitle(title);
@@ -107,13 +97,16 @@ export default function Chat({
 			}
 		};
 
-		socket.onerror = (error) => {
-			console.error("WebSocket error:", error);
-		};
+		socket.onerror = (error) => console.error("WebSocket error:", error);
+		socket.onclose = () => console.log("WebSocket closed");
+	};
 
-		socket.onclose = () => {
-			console.log("WebSocket closed");
-		};
+	useEffect(() => {
+		if (!wsUrl) return;
+
+		const socket = new WebSocket(wsUrl);
+		ws.current = socket;
+		setupSocket(socket);
 
 		return () => {
 			if (socket.readyState === WebSocket.OPEN) {

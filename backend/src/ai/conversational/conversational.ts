@@ -58,6 +58,7 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 				messagesWithFacts.splice(userMessageIndex, 0, {
 					role: 'assistant',
 					content: `For context: ${facts}`,
+					name: 'ignore',
 				} as any);
 
 				return messagesWithFacts;
@@ -70,7 +71,7 @@ export class ChatWorkflow extends WorkflowEntrypoint<Env, ChatParams> {
 		//Step 5: Get final response from the model
 		console.log('Step 5: Get final response from the model');
 		const finalResponse = await step.do('get-response', async () => {
-			const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
+			const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages, max_tokens: 2048 })) as any;
 			return response.response;
 		});
 
@@ -173,37 +174,4 @@ async function getIntent(messages: RoleScopedChatInput[]): Promise<[string, stri
 		default:
 			return [tool.name, ''];
 	}
-}
-
-async function newGetIntent(messages: RoleScopedChatInput[]): Promise<[string, string]> {
-	const toolList = await tools();
-	const lastMessage = messages[messages.length - 1].content;
-
-	const response = (await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
-		messages: [
-			{
-				role: 'system',
-				content: `You are an intent classifier. Given a user query, decide if it could be answered by searching the following knowledge base, or if it is a generic question.
-
-				Knowledge base description:
-				${toolList[0].description}
-
-				Reply with ONLY one of:
-				- "search: <optimized query>" if the question might be answered by the knowledge base
-				- "generic" if it is a general question
-
-				Never explain. Never add anything else.`,
-			},
-			{ role: 'user', content: lastMessage as string },
-		],
-	})) as any;
-
-	const text = response.response?.trim() ?? '';
-
-	if (text.startsWith('search:')) {
-		const query = text.replace('search:', '').trim();
-		return ['searchDocuments', query];
-	}
-
-	return ['generic', ''];
 }

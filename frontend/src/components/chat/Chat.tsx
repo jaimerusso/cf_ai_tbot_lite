@@ -36,11 +36,9 @@ export default function Chat({
 	const waitingResponseRef = useRef(false);
 	const isNewDialogue = useRef(false);
 
-	const sendMessageRequest = async (
-		prompt: string,
-		dialogueId: string,
-		socket: WebSocket
-	) => {
+	//Pre: ws.current is always a WebSocket
+	const sendMessageRequest = async (prompt: string, dialogueId: string) => {
+		const socket = ws.current as WebSocket;
 		setMessages((prev) => [...prev, { role: "user", content: prompt }]);
 		setWaitingResponse(true);
 		waitingResponseRef.current = true;
@@ -57,15 +55,15 @@ export default function Chat({
 
 		let socket = ws.current;
 		if (socket && socket.readyState === WebSocket.OPEN && dialogueId) {
-			sendMessageRequest(prompt, dialogueId, socket);
+			sendMessageRequest(prompt, dialogueId);
 		} else {
 			//Reopen Websocket and retry sending message
 			socket = new WebSocket(wsUrl);
 			ws.current = socket;
 			socket.onopen = () => {
 				console.log("WebSocket opened");
+				sendMessageRequest(prompt, dialogueId);
 			};
-			sendMessageRequest(prompt, dialogueId, socket);
 		}
 	};
 

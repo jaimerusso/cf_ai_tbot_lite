@@ -21,7 +21,7 @@ function App() {
 		<Router>
 			<Routes>
 				<Route path="/" element={<Navigate to="/home" />} />
-				<Route path="/home" element={<HomeScreen />} />
+				<Route path="/home" element={<HomeScreen IP={IP} />} />
 				<Route
 					path="/dialogue"
 					element={<DialogueScreen httpUrl={httpUrl} wsUrl={wsUrl} />}

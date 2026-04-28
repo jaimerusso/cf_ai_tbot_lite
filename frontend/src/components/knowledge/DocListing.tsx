@@ -19,6 +19,10 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		return localStorage.getItem("infoSeen") !== "true";
 	});
 	const [dragging, setDragging] = useState(false);
+	const [errorPopup, setErrorPopup] = useState(false);
+	const [notPlainDocs, setNotPlain] = useState<string[]>([]);
+	const [alreadyExistsDocs, setAlreadyExists] = useState<string[]>([]);
+	const [emptyFilesDocs, setEmptyFiles] = useState<string[]>([]);
 
 	const pollRef = useRef(false);
 	const actionDocsRef = useRef<Record<string, string>>({});
@@ -44,12 +48,9 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	//Get documents, turn off poll if all are ready, turn on if there is at least one that isnt
 	const request = () => {
 		axios.get(`${httpUrl}/knowledge`).then((res) => {
-			console.log("Received res");
+			console.log("Received response");
 			const resDocs = res.data.documents as Document[];
 			setLoading(false);
-
-			console.log("resdocs: ", resDocs);
-			console.log("resdocs: ", documents);
 
 			//If the res docs are different from the saved docs, it must check if needs to stop polling
 			if (
@@ -72,12 +73,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				pollRef.current =
 					hasNonReady ||
 					Object.keys(actionDocsRef.current).length > 0;
-
-				console.log("test:", hasNonReady);
-				console.log(
-					"test:",
-					Object.keys(actionDocsRef.current).length > 0
-				);
 
 				if (
 					!(
@@ -141,11 +136,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 	const handleUpload = async (files: FileList | null) => {
 		if (!files) return;
 
-		//The three possible errors
-		const notPlain = [];
-		const alreadyExists = [];
-		const emptyFiles = [];
-
 		const formData = new FormData();
 
 		Array.from(files).forEach((file) => {
@@ -156,13 +146,38 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 			formData.append("files", file);
 		});
 
-		axios.post(`${httpUrl}/knowledge`, formData).then((res) => {
-			const resData = res.data;
-			console.log(resData);
-		});
+		//The three possible errors
+		const notPlain: string[] = [];
+		const alreadyExists: string[] = [];
+		const emptyFiles: string[] = [];
 
-		pollRef.current = true;
-		startPolling();
+		const res = await axios.post(`${httpUrl}/knowledge`, formData);
+		const resData = res.data;
+		notPlain.push(...(resData.notPlain ?? []));
+		alreadyExists.push(...(resData.alreadyExists ?? []));
+		emptyFiles.push(...(resData.emptyFiles ?? []));
+
+		if (
+			notPlain.length > 0 ||
+			alreadyExists.length > 0 ||
+			emptyFiles.length > 0
+		) {
+			setNotPlain(notPlain);
+			setAlreadyExists(alreadyExists);
+			setEmptyFiles(emptyFiles);
+
+			setErrorPopup(true);
+		}
+
+		const fileNum = Array.from(files).length;
+		const errorNum =
+			notPlain.length + alreadyExists.length + emptyFiles.length;
+
+		//Start polling only if there are well succeded docs
+		if (fileNum > errorNum) {
+			pollRef.current = true;
+			startPolling();
+		}
 	};
 
 	const handleDrop = (e: React.DragEvent) => {
@@ -181,6 +196,49 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 	return (
 		<>
+			{errorPopup && (
+				<Popup
+					title={"Error"}
+					description={
+						<>
+							<p>Some files couldn't be processed:</p>
+							{notPlainDocs.length > 0 && (
+								<>
+									<p>Not plain text:</p>
+									{notPlainDocs.map((name) => (
+										<p key={name}>— {name}</p>
+									))}
+								</>
+							)}
+							{alreadyExistsDocs.length > 0 && (
+								<>
+									<p>Already exist:</p>
+									{alreadyExistsDocs.map((name) => (
+										<p key={name}>— {name}</p>
+									))}
+								</>
+							)}
+							{emptyFilesDocs.length > 0 && (
+								<>
+									<p>Empty files:</p>
+									{emptyFilesDocs.map((name) => (
+										<p key={name}>— {name}</p>
+									))}
+								</>
+							)}
+						</>
+					}
+					buttonText={"OK"}
+					buttonColor={"green"}
+					buttonFunc={() => {
+						setErrorPopup(false);
+						setNotPlain([]);
+						setAlreadyExists([]);
+						setEmptyFiles([]);
+					}}
+					notHaveCancel={true}
+				/>
+			)}
 			<div
 				onDrop={(e) => handleDrop(e)}
 				onDragOver={(e) => handleDragOver(e)}

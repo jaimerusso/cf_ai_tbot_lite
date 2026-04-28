@@ -4,7 +4,7 @@ import logo from "../assets/CFxtbot.png";
 
 import Button from "../components/Button";
 
-export default function HomeScreen() {
+export default function HomeScreen({ IP }: { IP: string }) {
 	useEffect(() => {
 		document.title = "Home";
 	}, []);
@@ -39,7 +39,7 @@ export default function HomeScreen() {
 							and the backend as a{" "}
 							<a
 								className="text-cf font-semibold "
-								href="https://cf-ai-tbot-lite-backend.itsjaimerusso.workers.dev/"
+								href={`https://${IP}`}
 								target="_blank"
 							>
 								Cloudflare Worker

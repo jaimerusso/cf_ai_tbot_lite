@@ -1,6 +1,6 @@
 # tbot lite — Cloudflare Software Engineer Internship (Summer 2026)
 
-![CFxtbot](https://github.com/jaimerusso/cf_ai_tbot_lite/blob/main/frontend/src/assets/CFxtbot.png?raw=true)
+![CFxtbot](./frontend/src/assets/CFxtbot.png?raw=true)
 
 A specialized interface showcasing a "lite" version of my **tbot** thesis project. This full-stack application was built and deployed entirely on Cloudflare's ecosystem, leveraging Workers AI for document ingestion and conversational dialogue.
 
@@ -18,6 +18,22 @@ This project implements a **RAG (Retrieval-Augmented Generation)** pipeline. Unl
 2. **Vectorization & Storage:** Documents are processed and converted into embeddings stored in Cloudflare Vectorize.
 3. **Contextual Retrieval:** When a user asks a question, the system searches the vector index for the most semantically relevant content.
 4. **Augmented Response:** The retrieved context is injected into the LLM prompt, enabling accurate, domain-specific answers grounded in the uploaded documents — effectively reducing hallucinations.
+
+---
+
+## 🏗️ Architecture
+
+### Conversational Pipeline
+
+![Conversational Pipeline](./diagrams/conversational_pipeline.png)
+
+### Document Ingestion Pipeline
+
+![Document Ingestion Pipeline](./diagrams/ingest_pipeline.png)
+
+### Document Deletion Pipeline
+
+![Document Deletion Pipeline](./diagrams/delete_pipeline.png)
 
 ---
 

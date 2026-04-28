@@ -83,14 +83,32 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 					console.log("Poll stopped");
 				}
 
-				// Update documents, preserving the "deleting" status for documents pending deletion to avoid stale states from the server response
-				setDocuments(
-					resDocs.map((doc) =>
-						actionDocsRef.current[doc.name] === "deleting"
-							? { ...doc, status: "deleting" }
-							: doc
-					)
-				);
+				setDocuments((prev) => {
+					// Keep processing docs that haven't arrived in resDocs yet
+					const pendingProcessing = prev.filter(
+						(d) =>
+							actionDocsRef.current[d.name] === "processing" &&
+							!resDocs.find((r) => r.name === d.name)
+					);
+
+					// Update documents, preserving the "deleting" status for documents pending deletion to avoid stale states from the server response
+					const updated = resDocs.map((doc) => {
+						if (actionDocsRef.current[doc.name] === "deleting") {
+							const existing = prev.find(
+								(d) => d.name === doc.name
+							);
+							return {
+								...doc,
+								status: "deleting",
+								lastUpdated:
+									existing?.lastUpdated ?? doc.lastUpdated,
+							};
+						}
+						return doc;
+					});
+
+					return [...updated, ...pendingProcessing];
+				});
 			}
 		});
 	};
@@ -132,7 +150,13 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 
 		setDocuments(
 			documents.map((doc) =>
-				doc.name === name ? { ...doc, status: "deleting" } : doc
+				doc.name === name
+					? {
+							...doc,
+							status: "deleting",
+							lastUpdated: Date.now(),
+						}
+					: doc
 			)
 		);
 
@@ -151,10 +175,6 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		const formData = new FormData();
 
 		Array.from(files).forEach((file) => {
-			actionDocsRef.current = {
-				...actionDocsRef.current,
-				[file.name]: "processing",
-			}; //Set document names that had action
 			formData.append("files", file);
 		});
 
@@ -168,6 +188,29 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		notPlain.push(...(resData.notPlain ?? []));
 		alreadyExists.push(...(resData.alreadyExists ?? []));
 		emptyFiles.push(...(resData.emptyFiles ?? []));
+
+		// Add only successful files to actionDocs and start fake processng them
+		const errorFiles = [...notPlain, ...alreadyExists, ...emptyFiles];
+		Array.from(files).forEach((file) => {
+			if (!errorFiles.includes(file.name)) {
+				actionDocsRef.current = {
+					...actionDocsRef.current,
+					[file.name]: "processing",
+				};
+
+				setDocuments(
+					documents.map((doc) =>
+						doc.name === file.name
+							? {
+									...doc,
+									status: "processing",
+									lastUpdated: Date.now(),
+								}
+							: doc
+					)
+				);
+			}
+		});
 
 		if (
 			notPlain.length > 0 ||

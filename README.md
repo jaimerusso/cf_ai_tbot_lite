@@ -5,7 +5,7 @@
 A specialized interface showcasing a "lite" version of my **tbot** thesis project. This full-stack application was built and deployed entirely on Cloudflare's ecosystem, leveraging Workers AI for document ingestion and conversational dialogue.
 
 **Live Demo:** [https://cf-ai-tbot-lite.pages.dev/home](https://cf-ai-tbot-lite.pages.dev/home)
-> ⚡ The app runs faster locally due to Cloudflare Workers cold starts on the hosted version.
+> ⚡ The app runs faster locally.
 
 ---
 

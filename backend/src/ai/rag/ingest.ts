@@ -16,9 +16,11 @@ export class IngestWorkflow extends WorkflowEntrypoint<Env, Params> {
 
 		//Step 1: Create the document in the DO
 		console.log(name, ' - Step 1: Create the document in the DO');
-		await step.do(`create-document`, async () => {
-			await documentsStub.newDocument(name as string);
+		const sucess = await step.do(`create-document`, async () => {
+			return await documentsStub.newDocument(name as string);
 		});
+
+		if (!sucess) return;
 
 		//-----------CHUNKED-------------------
 		//Step 2: Chunk the content

@@ -33,7 +33,8 @@ export class Documents extends DurableObject<Env> {
 		await toolDescriptionsStub.updateToolDescription(resumee, false, documentName);
 	}
 
-	async newDocument(name: string): Promise<void> {
+	async newDocument(name: string): Promise<boolean> {
+		if (await this.getDocument(name)) return false;
 		await this.ctx.storage.put(name, {
 			name,
 			embeddingIds: [],
@@ -41,6 +42,7 @@ export class Documents extends DurableObject<Env> {
 			status: 'processing',
 			lastUpdated: Date.now(),
 		});
+		return true;
 	}
 
 	async updateDocument(

@@ -16,7 +16,7 @@ A collection of prompts used during development, organized by topic and layer.
 ### Code Organization
 
 - "Help me organize this component — extract repeated logic into helper functions and group related code."
-- "Help me generate a `Prompt.md` with the prompts I used, organized by topic and layer."
+- "Help me generate a `PROMPTS.md` with the prompts I used, organized by topic and layer."
 - "Help me generate a `README.md` for this project."
 
 ---
@@ -36,6 +36,7 @@ A collection of prompts used during development, organized by topic and layer.
 
 - "How do I do X in Tailwind? For example, how do I set a fixed column width or control text overflow?"
 - "Something is not visually in the right place — can you help me identify the issue from the code?"
+- "How do I correctly render markdown received from an LLM response?"
 
 ---
 
@@ -60,6 +61,10 @@ A collection of prompts used during development, organized by topic and layer.
 - "Generate a logic to add a search tool description per document that can later be removed by filename. Each line should contain the document name and its summary."
 - "The chatbot is not identifying the tools correctly — how can I improve the tool descriptions and prompts for the LLM?"
 - "The tool result is not being acted upon by the model — how should I structure the message array so the model follows through on tool calls?"
+
+### Chunking Strategy
+
+- "What is a good character count per chunk and a good overlap value to avoid losing context between chunks when splitting documents for RAG ingestion?"
 
 ### File Handling
 

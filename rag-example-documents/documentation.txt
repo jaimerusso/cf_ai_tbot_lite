@@ -39,17 +39,18 @@ This project implements a **RAG (Retrieval-Augmented Generation)** pipeline. Unl
 
 ## 🛠️ Technical Stack
 
-| Layer              | Technology                                           |
-| ------------------ | ---------------------------------------------------- |
-| Frontend Framework | React 19 + Vite                                      |
-| Styling            | Tailwind CSS v4                                      |
-| Frontend Hosting   | Cloudflare Pages                                     |
-| Backend Runtime    | Cloudflare Workers                                   |
-| Stateful Backend   | Cloudflare Durable Objects                           |
-| Async Workflows    | Cloudflare Workflows                                 |
-| Vector Database    | Cloudflare Vectorize                                 |
-| LLM                | Llama 3.3 (`llama-3.3-70b-instruct-fp8-fast`) — Meta |
-| Embedding Model    | BGE Base EN v1.5 (`bge-base-en-v1.5`) — BAAI         |
+| Layer              | Technology                                                        |
+| ------------------ | ----------------------------------------------------------------- |
+| Frontend Framework | React 19 + Vite                                                   |
+| Styling            | Tailwind CSS v4                                                   |
+| Frontend Hosting   | Cloudflare Pages                                                  |
+| Backend Runtime    | Cloudflare Workers                                                |
+| Stateful Backend   | Cloudflare Durable Objects                                        |
+| Async Workflows    | Cloudflare Workflows                                              |
+| Vector Database    | Cloudflare Vectorize                                              |
+| LLM (Chat)         | Llama 4 Scout (`@cf/meta/llama-4-scout-17b-16e-instruct`) — Meta  |
+| LLM (Reasoning)    | Llama 3.3 70B (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) — Meta |
+| Embedding Model    | BGE Base EN v1.5 (`bge-base-en-v1.5`) — BAAI                      |
 
 ---
 

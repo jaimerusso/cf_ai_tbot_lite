@@ -140,6 +140,7 @@ export default function Chat({
 			waitingResponseRef.current = false;
 		} else {
 			setMessages([]);
+			setWaitingResponse(false);
 		}
 	}, [activeDialID]);
 

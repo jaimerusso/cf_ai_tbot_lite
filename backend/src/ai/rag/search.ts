@@ -28,11 +28,15 @@ export class SearchWorkflow extends WorkflowEntrypoint<Env, Params> {
 		});
 
 		//Step 3: Transform matches in string list
-		console.log('Step 3: Transform matches in string list');
+		console.log('Step 3: Transform matches in string list\n\n');
 		const matchStrings = await step.do(`transform-matches`, async () => {
-			return matches.matches.map((match) => {
-				return match.metadata?.chunk;
-			});
+			const MIN_SCORE = 0.6;
+
+			const relevantMatches = matches.matches.filter((match) => match.score >= MIN_SCORE);
+
+			if (relevantMatches.length === 0) return [];
+
+			return relevantMatches.map((match) => match.metadata?.chunk);
 		});
 
 		return matchStrings;

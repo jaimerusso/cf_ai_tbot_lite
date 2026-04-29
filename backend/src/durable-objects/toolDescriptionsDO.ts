@@ -28,7 +28,7 @@ export class ToolDescriptions extends DurableObject<Env> {
 				} else {
 					messages = remove_search_documents_instructions(currentDescription, resumee);
 				}
-				const res = (await this.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages })) as any;
+				const res = (await this.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages, max_tokens: 4096 })) as any;
 				newDescription = res.response;
 			}
 			await this.ctx.storage.put(toolDescriptionsDOName, newDescription);

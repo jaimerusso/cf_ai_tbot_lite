@@ -1,0 +1,202 @@
+================================================================================
+PROFESSIONAL PROFILE - JAIME RUSSO
+================================================================================
+
+PERSONAL INFORMATION
+--------------------
+Name:        Jaime Russo
+Location:    Almada, Setubal, Portugal
+Email:       itsjaimerusso@gmail.com
+Phone:       (+351) 967 016 653
+LinkedIn:    https://www.linkedin.com/in/jaime-russo-13053422b/
+GitHub:      https://github.com/jaimerusso
+Connections: 322 LinkedIn connections
+
+PROFESSIONAL TITLE
+------------------
+Software Engineer (AI Architectures, LLMs & RAG)
+Current Role: SAP Technical Analyst at Stratesys Portugal
+
+AVAILABILITY
+------------
+Open to opportunities: Yes (On-site, Hybrid and Remote)
+
+================================================================================
+SUMMARY
+================================================================================
+
+Computer Engineer (MSc from FCT NOVA) specializing in Generative AI and enterprise
+systems. Proven track record in building RAG architectures and Full-Stack development.
+Awarded by Asseco for the ability to transform technology into business innovation.
+
+================================================================================
+PROFESSIONAL EXPERIENCE
+================================================================================
+
+[1] Stratesys Portugal | SAP Technical Analyst
+    Type:     Full-time
+    Period:   October 2025 – Present (7 months)
+    Location: Lisbon, Portugal (Hybrid)
+    - Responsible for technical analysis and systems integration within the SAP ERP ecosystem.
+    Skills: SAP, SAP ERP, SAP CPI, Groovy, ABAP
+
+[2] t_insight | MSc Thesis Developer (AI & RAG)
+    Type:     Internship / Thesis Project
+    Period:   September 2024 – November 2025 (1 year and 3 months)
+    Location: Lisbon, Portugal (On-site)
+    - Developed t_bot, a Generative AI system designed for professional productivity.
+    - Engineered a robust RAG (Retrieval-Augmented Generation) pipeline to eliminate
+      LLM hallucinations and ensure data grounding on private documentation.
+    - Built a scalable Full-Stack interface with real-time synchronization via WebSockets.
+    - Dual architecture: Backoffice (RAG pipeline, automated document ingestion)
+      + App (Full-Stack interface for real-time AI interaction).
+    Skills: OOP, Concurrent Programming, LLMs, RAG, Python, WebSockets, REST API
+
+[3] t_insight | Digital Marketing Engineer (Intern)
+    Type:     Internship
+    Period:   March 2025 – October 2025 (8 months)
+    Location: Lisbon, Portugal (On-site)
+    - Applied software engineering principles to digital marketing.
+    - Developed and maintained platforms using PHP and WordPress.
+    - Built automation tools to streamline marketing workflows.
+    - Enhanced technical implementation for data-driven campaigns.
+    Skills: PHP, WordPress, Software Development
+
+================================================================================
+EDUCATION
+================================================================================
+
+[1] NOVA School of Science and Technology – FCT NOVA
+    Degree:   Master's (MSc) in Computer Science and Engineering
+    Period:   September 2023 – November 2025
+    Skills:   Software Development, Project Management, LLMs, RAG,
+              Software Architecture, Distributed Systems, AI
+
+[2] NOVA School of Science and Technology – FCT NOVA
+    Degree:   Bachelor's (BSc) in Computer Science and Engineering
+    Period:   September 2020 – June 2023
+    Relevant coursework:
+    - Software Engineering
+    - Object-Oriented Programming (Java)
+    - Distributed Systems
+    - Artificial Intelligence (Python)
+    - Databases
+    - Fundamentals of Operating Systems
+    - Algorithms and Data Structures (Java)
+    - Programming Languages and Environments
+    - Computer Architecture
+    - Theory of Computation
+    - Computer Networks
+    - Algorithm Analysis and Design
+    - Computer Graphics and Interfaces
+
+================================================================================
+CERTIFICATIONS & LICENSES
+================================================================================
+
+- Talent Bootcamp – November 2023
+- Magma Personal Finance MBA (3rd Edition) – Magma Studio, March 2024
+  (Certification in Personal Financial Management)
+
+================================================================================
+PROJECTS
+================================================================================
+
+[1] t_bot – MSc Thesis
+    Period:      September 2024 – November 2025
+    Associated:  t_insight + FCT NOVA
+    Description:
+    A Generative AI system developed as a Master's Thesis at FCT NOVA in collaboration
+    with T_insight. The project explores how Generative AI can practically transform
+    professional productivity through a functional, end-to-end production-ready system.
+
+    Backoffice Architecture (the "Engine"):
+    - Robust RAG pipeline with automated document ingestion.
+    - Data grounding to ensure accurate and reliable AI responses.
+    - Hallucination elimination by keeping the model focused on private documentation.
+
+    App Architecture (the Interface):
+    - Scalable Full-Stack interface for real-time user interaction.
+    - User-managed knowledge base.
+    - Fine-tuned interaction layer with contextual awareness for complex queries.
+
+    Skills: AI, LLMs, RAG, Python, WebSockets, REST API, Full-Stack,
+            Software Architecture, OOP, Concurrent Programming
+
+[2] 3DShop – Spring Hackathon 2024 (n.inf – FCT NOVA)
+    Period:   May 2024 – May 2024
+    Associated: FCT NOVA
+    Result:   3rd place out of 6-7 teams
+    Jury:     FCT NOVA professors + Sky, Crossjoin Solutions, and Deloitte
+    Description:
+    A Fashion E-commerce solution developed at a Computer Science hackathon organized
+    by n.inf (FCT NOVA's Computer Science Student Association). The project covered
+    product ideation, competitor research, MVP development, and a pitch with a solid
+    business model.
+    Skills: Business Strategy, Deep Learning, MVP Development
+
+================================================================================
+AWARDS
+================================================================================
+
+- "Inspired Technology" Award (Asseco):
+  Top Award – 1st place out of 200+ teams in the FCT NOVA entrepreneurship project
+  Scargraph (2024). Developed an innovative medical device using Computer Vision.
+
+- Spring Hackathon 2024 (n.inf – FCT NOVA):
+  3rd place with the 3DShop solution for Fashion E-commerce.
+
+================================================================================
+CORE COMPETENCIES
+================================================================================
+
+AI & Data:
+  - Large Language Models (LLMs)
+  - RAG (Retrieval-Augmented Generation)
+  - Azure AI
+  - Deep Learning
+  - Computer Vision
+
+SAP Ecosystem:
+  - SAP CPI
+  - SAP ERP
+  - Groovy
+  - ABAP
+
+Tech Stack:
+  - Languages:   Python, SQL, Java, Kotlin, PHP, HTML, CSS
+  - Frameworks:  Tailwind, React, React Native
+  - Protocols:   REST API, WebSockets
+  - Paradigms:   OOP, Concurrent Programming
+
+Engineering:
+  - Software Architecture
+  - Scalable Systems
+  - Distributed Systems
+
+Business:
+  - Project Management
+  - Business Strategy
+  - Financial Management
+
+================================================================================
+LANGUAGES
+================================================================================
+
+- Portuguese  – Native
+- English     – Advanced
+- Spanish     – Advanced
+
+================================================================================
+LINKEDIN ACTIVITY & INTERESTS
+================================================================================
+
+Topics frequently shared and engaged with:
+- Artificial Intelligence and best practices for LLM usage in the workplace
+- Remote and hybrid work models / productivity strategies
+- Tech job market in Portugal (SAP, AI, Software Engineering roles)
+- Leadership, people management and organisational culture
+- Social causes and national events
+- Entrepreneurship and innovation in technology
+
+================================================================================

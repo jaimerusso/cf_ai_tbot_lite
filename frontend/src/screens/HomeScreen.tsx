@@ -21,12 +21,7 @@ export default function HomeScreen({ IP }: { IP: string }) {
 							<span className="text-tbot">
 								tbot thesis project
 							</span>
-							. Developed specifically for the{" "}
-							<span className="text-cf">
-								Cloudflare Software Engineer Internship (Summer
-								2026)
-							</span>
-							, this full-stack application was built and deployed
+							. This full-stack application was built and deployed
 							entirely on Cloudflare's ecosystem, the frontend as
 							a{" "}
 							<a

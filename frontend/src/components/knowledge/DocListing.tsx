@@ -85,6 +85,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				const succDocs = resDocs.filter(
 					(d) =>
 						d.name in actionDocsRef.current &&
+						actionDocsRef.current[d.name] !== "deleting" &&
 						d.status === actionDocsRef.current[d.name]
 				);
 

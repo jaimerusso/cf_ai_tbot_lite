@@ -10,6 +10,7 @@ type Document = {
 };
 
 export default function DocListing({ httpUrl }: { httpUrl: string }) {
+	const [loading, setLoading] = useState(true);
 	const actionDocsRef = useRef<Record<string, string>>({});
 
 	const buildDocumentList = (): Document[] => {
@@ -27,7 +28,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		buildDocumentList()
 	);
 	const [delName, setDelName] = useState("");
-	const [loading, setLoading] = useState(true);
+
 	const [popup, setPopup] = useState(false);
 	const [infoPopup, setInfoPopup] = useState(() => {
 		return localStorage.getItem("infoSeen") !== "true";

@@ -85,7 +85,7 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 				const succDocs = resDocs.filter(
 					(d) =>
 						d.name in actionDocsRef.current &&
-						actionDocsRef.current[d.name] !== "deleting" &&
+						actionDocsRef.current[d.name] === "ready" &&
 						d.status === actionDocsRef.current[d.name]
 				);
 
@@ -221,7 +221,9 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		const emptyFiles: string[] = [];
 
 		console.log("requesting backend");
+		setLoading(true);
 		const res = await axios.post(`${httpUrl}/knowledge`, formData);
+		setLoading(false);
 		const resData = res.data;
 		notPlain.push(...(resData.notPlain ?? []));
 		alreadyExists.push(...(resData.alreadyExists ?? []));

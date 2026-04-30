@@ -16,7 +16,10 @@ export default function DocListing({ httpUrl }: { httpUrl: string }) {
 		const saved = localStorage.getItem("documents");
 		const savedActions = localStorage.getItem("actionDocs");
 		if (savedActions) actionDocsRef.current = JSON.parse(savedActions);
-		if (!saved) return [];
+
+		if (saved) setLoading(false);
+		else return [];
+
 		return JSON.parse(saved) as Document[];
 	};
 

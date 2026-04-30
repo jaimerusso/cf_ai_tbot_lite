@@ -1,4 +1,4 @@
-# tbot lite — Cloudflare Software Engineer Internship (Summer 2026)
+# tbot lite
 
 ![CFxtbot](./frontend/src/assets/CFxtbot.png?raw=true)
 
